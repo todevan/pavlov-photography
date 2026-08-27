@@ -1,0 +1,95 @@
+.shell :global(.pp-nav) {
+  max-width: 100rem;
+  gap: 2.5rem;
+  padding: calc(1.35rem + env(safe-area-inset-top)) 1.5rem 1.35rem;
+}
+
+.shell :global(.pp-brand) {
+  font-family: var(--font-cormorant), serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.025em;
+  text-transform: none;
+}
+
+.shell :global(.pp-nav-link) {
+  font-size: 0.84rem;
+  letter-spacing: 0.055em;
+}
+
+.shell :global(.pp-nav-cta),
+.shell :global(.pp-button-primary),
+.shell :global(.pp-button-secondary) {
+  min-height: 3rem;
+  padding: 0.9rem 1.3rem;
+}
+
+.shell :global(.pp-hero-frame-1) {
+  inset: 0 17% 4% 0;
+  transform: rotate(-0.6deg);
+}
+
+.shell :global(.pp-hero-frame-2) {
+  top: 15%;
+  right: 0;
+  bottom: 8%;
+  width: 34%;
+  transform: rotate(1deg);
+}
+
+@media (min-width: 1024px) {
+  .shell :global(.pp-nav) {
+    padding-inline: 2.5rem;
+  }
+
+  .shell :global(.pp-menu-button),
+  .shell :global(.pp-mobile-menu) {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .shell :global(.pp-nav) {
+    gap: 1.75rem;
+    padding-inline: 1.5rem;
+  }
+
+  .shell :global(.pp-brand) {
+    font-size: 1.2rem;
+  }
+
+  .shell :global(.pp-hero-frame-1) {
+    inset: 0 16% 7% 0;
+  }
+
+  .shell :global(.pp-hero-frame-2) {
+    top: 25%;
+    bottom: 3%;
+    width: 36%;
+  }
+}
+
+@media (max-width: 767px) {
+  .shell :global(.pp-nav) {
+    padding-inline: 1rem;
+  }
+
+  .shell :global(.pp-brand) {
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+  }
+
+  .shell :global(.pp-hero-frame-1) {
+    inset: 0 12% 12% 0;
+    transform: rotate(-0.45deg);
+  }
+
+  .shell :global(.pp-hero-frame-2) {
+    top: 36%;
+    right: 0;
+    bottom: 0;
+    width: 37%;
+    transform: rotate(0.7deg);
+  }
+}
