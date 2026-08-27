@@ -80,4 +80,17 @@ export const homeEditorialContent = {
       ratio: "wide",
     },
   ],
+  why: {
+    title: "Професионално заснемане без излишно усложнение.",
+    points: [
+      "Ясна цена предварително",
+      "Предаване до 24–48 часа",
+      "Обработени готови файлове",
+      "Директна комуникация с фотографа",
+    ],
+    name: "Теодор Павлов",
+    role: "Commercial photographer · Sofia",
+    href: "/about",
+  },
+  beforeAfter: homeContent.portfolio.beforeAfter,
 } as const;
