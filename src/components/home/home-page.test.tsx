@@ -40,4 +40,25 @@ describe("HomePage editorial integration", () => {
       "/services/products",
     );
   });
+
+  it("renders the approved conversion narrative in exact order", () => {
+    const { container } = render(<HomePage />);
+    const ids = Array.from(container.querySelectorAll("main > section[id]")).map(
+      (node) => node.id,
+    );
+
+    expect(ids).toEqual([
+      "hero",
+      "services",
+      "portfolio",
+      "about",
+      "before-after",
+      "videography",
+      "process",
+      "reviews",
+      "faq",
+      "contact",
+    ]);
+    expect(screen.queryByRole("link", { name: "Обади се сега" })).not.toBeInTheDocument();
+  });
 });
