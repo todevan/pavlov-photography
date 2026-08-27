@@ -1,9 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test("desktop flow covers anchors, services, gallery, faq, slider, and contact handoff", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1280, height: 2400 });
+test("desktop editorial homepage stays minimal and completes booking flow", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.route("https://formspree.io/f/mnjoooke", async (route) => {
     await route.fulfill({
       status: 200,
@@ -11,87 +9,92 @@ test("desktop flow covers anchors, services, gallery, faq, slider, and contact h
       body: JSON.stringify({ ok: true }),
     });
   });
-  await page.goto("/");
-
-  await expect(page.getByRole("heading", { name: /Снимки, които/i })).toBeVisible();
-  await expect(page.locator("header").getByRole("link", { name: "Контакт" })).toHaveCount(1);
-  await expect(page.locator("header").getByText("Теодор Павлов")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Отвори менюто" })).toBeHidden();
-  await expect(page.locator("#hero")).not.toContainText("Наличен в София и региона");
-  await expect(page.locator("#hero")).not.toContainText("SCROLL");
-
-  await page.getByRole("link", { name: "Запази сесия" }).first().click();
-  await expect(page).toHaveURL(/#contact$/);
 
   await page.goto("/");
-  await page.locator("#hero").getByRole("button", { name: /Недвижими имоти/i }).click();
-  await expect(
-    page.locator("#services").getByRole("tab", { name: "Недвижими имоти" }),
-  ).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByText("Перфектен за малък апартамент")).toBeVisible();
 
-  await page.locator("#services").getByRole("tab", { name: "Недвижими имоти" }).click();
-  await expect(page.getByText("Перфектен за малък апартамент")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Снимки, които продават." })).toBeVisible();
+  await expect(page.locator("#hero")).not.toContainText("Commercial Photography");
+  await expect(page.locator("#hero")).not.toContainText("24–48ч");
+  await expect(page.locator("#hero")).not.toContainText("София и региона");
+  await expect(page.locator("#hero")).not.toContainText("От €20");
 
-  await page.getByRole("button", { name: /Продуктови видеа/i }).click();
-  await expect(page.getByText(/Кратки product reels/)).toBeVisible();
+  const servicesTop = await page.locator("#services").evaluate(
+    (element) => element.getBoundingClientRect().top,
+  );
+  expect(servicesTop).toBeGreaterThanOrEqual(890);
 
-  await page.locator("#portfolio").scrollIntoViewIfNeeded();
-  await expect(page.getByRole("tab", { name: "Видео" })).toHaveCount(0);
-  await expect(page.locator("#portfolio")).not.toContainText("Кинематичен тур на апартамент");
-  await expect(page.locator("#portfolio")).not.toContainText("Видео сесия за премиум автомобил");
+  await page.getByRole("link", { name: "Виж услугите" }).click();
+  await expect(page.locator("#services")).toBeInViewport();
+  await expect(page.locator("#services").getByRole("link", { name: /Недвижими имоти/i })).toBeVisible();
+  await expect(page.locator("#services").getByRole("link", { name: /Автомобили/i })).toBeVisible();
+  await expect(page.locator("#services").getByRole("link", { name: /Продукти/i })).toBeVisible();
 
-  await page.locator("#portfolio").getByRole("tab", { name: "Автомобили" }).click();
-  await expect(page.getByText("2 проекта")).toBeVisible();
-  await expect(page.getByRole("button", { name: /BMW M Series/i })).toHaveCount(0);
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator("#reviews article")).toHaveCount(3);
 
   const slider = page.getByRole("slider", { name: "Плъзгач преди и след" });
+  await slider.scrollIntoViewIfNeeded();
   await slider.focus();
   await page.keyboard.press("ArrowRight");
   await expect(slider).toHaveAttribute("aria-valuenow", "55");
-  await expect(page.getByRole("heading", { name: /Преди и/i })).toHaveCount(0);
 
   await page.getByRole("button", { name: "Включена ли е обработката в цената?" }).click();
   await expect(
     page.getByText(/Стандартната обработка включва светлина, цвят и изправяне/),
   ).toBeVisible();
-  await expect(page.locator("#reviews article")).toHaveCount(1);
 
   await page.locator("#contact").scrollIntoViewIfNeeded();
   await page.getByLabel("Име").fill("Иван Петров");
   await page.getByLabel("Телефон").fill("0888 123 456");
   await page.getByLabel("Тип заснемане").selectOption("Автомобили");
-  await page
-    .getByLabel("Съобщение")
-    .fill("Търся премиум автомобилна фотосесия за нова обява.");
+  await page.getByLabel("Съобщение").fill("Търся автомобилна фотосесия за обява.");
   await page.getByRole("button", { name: "Изпрати запитване" }).click();
-
   await expect(page.getByText(/Запитването беше изпратено успешно/i)).toBeVisible();
 
-  const hasHorizontalScroll = await page.evaluate(
-    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-  );
-  expect(hasHorizontalScroll).toBeFalsy();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    ),
+  ).toBe(false);
 });
 
-test("mobile layout shows drawer navigation and sticky call CTA", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 1200 });
+test("mobile opening remains dark, minimal, and uncluttered", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  await expect(page.getByRole("link", { name: "Обади се сега" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Снимки, които продават." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Обади се сега" })).toHaveCount(0);
+
+  const servicesTop = await page.locator("#services").evaluate(
+    (element) => element.getBoundingClientRect().top,
+  );
+  expect(servicesTop).toBeGreaterThanOrEqual(834);
 
   await page.getByRole("button", { name: "Отвори менюто" }).click();
   await expect(page.locator('a[href="#portfolio"]').last()).toBeVisible();
   await expect(page.locator('a[href="#contact"]').last()).toBeVisible();
+
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    ),
+  ).toBe(false);
 });
 
-test("tablet layout keeps the floating call CTA hidden", async ({ page }) => {
-  await page.setViewportSize({ width: 768, height: 1400 });
+test("critical homepage content is visible without JavaScript", async ({ browser }) => {
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    viewport: { width: 1280, height: 900 },
+  });
+  const page = await context.newPage();
   await page.goto("/");
 
-  await expect(page.getByRole("link", { name: "Обади се сега" })).toBeHidden();
-  await expect(page.locator("body")).toContainText("Снимки, които");
+  await expect(page.getByRole("heading", { name: "Снимки, които продават." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Запази снимане" }).first()).toBeVisible();
+  await expect(page.locator("#services")).toContainText("Недвижими имоти");
+  await expect(page.locator("#services")).toContainText("от €20");
+  await expect(page.locator("#portfolio")).toContainText("BMW M SERIES");
+
+  await context.close();
 });
 
 test("contact form shows a retry message when Formspree rate-limits the request", async ({ page }) => {
