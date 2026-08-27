@@ -29,11 +29,11 @@ export function EditorialNavbar({ links }: EditorialNavbarProps) {
   return (
     <header className="pp-header fixed inset-x-0 top-0 z-50">
       <div className={isScrolled || isOpen ? "pp-nav pp-nav-solid" : "pp-nav pp-nav-clear"}>
-        <a href="#hero" className="pp-brand">
-          PAVLOV PHOTOGRAPHY
+        <a href="#hero" className="pp-brand pp-display">
+          Pavlov Photography
         </a>
 
-        <nav className="hidden items-center gap-7 lg:flex" aria-label="Основна навигация">
+        <nav className="hidden items-center gap-9 lg:flex" aria-label="Основна навигация">
           {links.map((link) => (
             <a key={link.href} href={link.href} className="pp-nav-link">
               {link.label}
