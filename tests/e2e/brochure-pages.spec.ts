@@ -1,21 +1,19 @@
 import { expect, test } from "@playwright/test";
 
-test("homepage deep links open the brochure pages", async ({ page }) => {
+test("homepage editorial deep links open the brochure pages", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("link", { name: "Повече за мен" }).click();
+  await page.getByRole("link", { name: "Повече за мен →" }).click();
   await expect(page).toHaveURL(/\/about$/);
   await expect(page.getByRole("heading", { name: /Кой стои зад кадъра/i })).toBeVisible();
 
   await page.goto("/");
-  await page.getByRole("link", { name: "Разгледай всички услуги" }).click();
-  await expect(page).toHaveURL(/\/services$/);
-  await expect(page.getByRole("heading", { name: /Услуги/i })).toBeVisible();
+  await page.locator("#services").getByRole("link", { name: /Недвижими имоти/i }).click();
+  await expect(page).toHaveURL(/\/services\/real-estate$/);
+  await expect(page.getByRole("heading", { name: /Недвижими имоти/i })).toBeVisible();
 });
 
-test("services hub and service detail pages cross-link to portfolio and booking", async ({
-  page,
-}) => {
+test("services hub and service detail pages cross-link to portfolio and booking", async ({ page }) => {
   await page.goto("/services");
 
   await page.getByRole("link", { name: "Недвижими имоти" }).click();
@@ -61,4 +59,12 @@ test("service detail pages use the tightened hero copy and centered layout block
   await page.goto("/services/products");
   await expect(page.getByRole("heading", { name: /Продукти с по-желано излъчване/i })).toBeVisible();
   await expect(page.locator("body")).not.toContainText("Продукти с по-чисто и по-желано излъчване");
+});
+
+test("phase 1 editorial scope does not leak onto brochure routes", async ({ page }) => {
+  for (const route of ["/about", "/services", "/services/automotive", "/portfolio"]) {
+    await page.goto(route);
+    await expect(page.locator(".home-editorial")).toHaveCount(0);
+    await expect(page.locator("main")).toBeVisible();
+  }
 });
