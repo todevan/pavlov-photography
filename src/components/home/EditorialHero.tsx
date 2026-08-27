@@ -8,6 +8,8 @@ interface EditorialHeroProps {
 }
 
 export function EditorialHero({ content }: EditorialHeroProps) {
+  const accessibleTitle = `${content.title.lead} ${content.title.accent}${content.title.tail ?? ""}`;
+
   return (
     <section
       id="hero"
@@ -15,7 +17,10 @@ export function EditorialHero({ content }: EditorialHeroProps) {
     >
       <div className="mx-auto grid w-full max-w-[92rem] gap-10 lg:grid-cols-[0.86fr_1.14fr] lg:items-center">
         <div className="relative z-10 max-w-2xl">
-          <h1 className="pp-display text-[clamp(4.1rem,8vw,7.5rem)] leading-[0.82] tracking-[-0.055em] text-[var(--pp-warm-white)]">
+          <h1
+            aria-label={accessibleTitle}
+            className="pp-display text-[clamp(4.1rem,8vw,7.5rem)] leading-[0.82] tracking-[-0.055em] text-[var(--pp-warm-white)]"
+          >
             <span className="block">{content.title.lead}</span>
             <span className="block italic text-[var(--pp-brass)]">
               {content.title.accent}
