@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
+import { useLayoutEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { revealVariants } from "@/lib/motion";
@@ -11,9 +13,14 @@ interface RevealProps {
 }
 
 export function Reveal({ children, className, amount = 0.25 }: RevealProps) {
+  const [isHydrated, setIsHydrated] = useState(false);
   const reduceMotion = useReducedMotion();
 
-  if (reduceMotion) {
+  useLayoutEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  if (reduceMotion || !isHydrated) {
     return <div className={className}>{children}</div>;
   }
 
