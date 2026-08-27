@@ -2,36 +2,37 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Apply the approved site-wide Editorial Commerce visual system to the homepage first, producing a minimal full-viewport dark opening, a gradual dark-to-warm scroll rhythm, image-led commercial proof, and a simpler booking path without visually changing non-home routes.
+**Goal:** Apply the approved site-wide Editorial Commerce visual system to the homepage first while keeping every non-home route visually and functionally unchanged in Phase 1.
 
-**Architecture:** Keep the existing Next.js app and business/data layer. Add homepage-only `--pp-*` tokens and a `.home-editorial` scope so Phase 1 cannot leak onto `/about`, `/services`, or portfolio routes. Rewrite homepage sections as focused server-first components where possible; keep only genuinely interactive pieces client-side: mobile navigation, FAQ, contact form, and the existing `BeforeAfterSlider`. Critical content must exist and remain visible in SSR HTML.
+**Architecture:** Build a parallel set of homepage-only Editorial components instead of modifying shared brochure components. `HomePage.tsx` becomes the only integration point, wrapped in `.home-editorial`; existing `Navbar`, `SiteFrame`, and brochure-page components remain unchanged. New sections are server components unless interaction is required; mobile navigation, FAQ, contact, and the existing `BeforeAfterSlider` remain client-side. Critical content is visible in SSR HTML without animation gates.
 
-**Tech Stack:** Next.js 16.2.3, React 19.2.4, TypeScript 5, Tailwind CSS 4, Vitest 4.1.4, Testing Library, Playwright 1.59.1, Next Image, existing Formspree contact integration.
+**Tech Stack:** Next.js 16.2.3, React 19.2.4, TypeScript 5, Tailwind CSS 4, Vitest 4.1.4, Testing Library, Playwright 1.59.1, Next Image, existing Formspree contact utilities.
 
 **Spec:** `docs/superpowers/specs/2026-08-27-homepage-editorial-commerce-design.md`
 
 ## Global Constraints
 
-- The visual system is site-wide; Phase 1 implementation changes the homepage only.
-- `/about`, `/services`, `/services/*`, `/portfolio`, and `/portfolio/*` must not receive unintended Phase 1 visual changes.
-- The initial viewport must be one complete dark composition. The next light section must not visibly intrude at first load on standard desktop or mobile viewport heights.
-- Hero content is limited to navigation, `Снимки, които продават.`, `Запази снимане`, `Виж услугите`, and photography.
-- Do not render the removed eyebrow, decorative line, supporting paragraph, trust signals, hero service cards, icons, or emoji-like metadata.
-- The hero-to-content transition must be gradual and CSS-driven; do not use a hard black-to-white cut immediately below the hero.
-- Do not present Unsplash or other stock imagery as Teodor Pavlov's work.
-- One owner-approved product photograph must be supplied as `public/portfolio/product-service.jpg` before Task 1 can become green. Do not substitute stock imagery.
-- Hero headings, service names/prices, selected work, booking controls, and other critical content must be visible without JavaScript animation.
-- Preserve the existing Formspree endpoint and contact validation/submission behavior.
-- Preserve keyboard access for the mobile menu, FAQ, before/after slider, and form controls.
-- Respect `prefers-reduced-motion`.
+- Site-wide design direction, homepage-only Phase 1 implementation.
+- Do not modify `src/components/home/Navbar.tsx` in Phase 1; `src/components/site/SiteFrame.tsx` uses it for brochure routes.
+- Do not modify dedicated brochure page components in Phase 1.
+- The first viewport contains only the minimal dark hero and navigation; no light section may visibly intrude at initial load.
+- Hero content is limited to `Снимки, които продават.`, `Запази снимане`, `Виж услугите`, and owner-approved photography.
+- Hero must not contain eyebrow text, decorative line, supporting paragraph, trust metadata, icons, emojis, stats, or service cards.
+- Hero-to-services color change is gradual and CSS-driven, not a hard black-to-white cut.
+- Do not present Unsplash or other stock images as Teodor Pavlov's work.
+- Before implementation reaches the asset task's GREEN state, the owner must supply one real product photograph at `public/portfolio/product-service.jpg`.
 - Do not add dependencies.
-- Do not delete old homepage components during Phase 1. Leave unused legacy components in place until the later site-wide migration, reducing risk during this redesign.
-- Implement on an isolated feature branch/worktree created from `design/homepage-editorial-commerce` at execution time. Do not implement directly on `main`.
-- Push the implementation branch to obtain a Vercel Preview. Do not merge to `main` until the owner explicitly approves that preview.
+- Critical headings, service names/prices, selected work, and booking controls remain visible without JavaScript.
+- Preserve existing contact validation, Formspree endpoint, success behavior, and rate-limit behavior.
+- Preserve keyboard access to mobile navigation, FAQ, before/after slider, and form controls.
+- Respect `prefers-reduced-motion`.
+- Keep old homepage components in the repository during Phase 1; only stop rendering them from `HomePage.tsx`.
+- Execute in an isolated worktree/feature branch created from `design/homepage-editorial-commerce`.
+- Obtain a Vercel Preview and explicit owner visual approval before merging to `main`.
 
 ## Execution Preflight
 
-At execution time, use the `superpowers:using-git-worktrees` skill and create an isolated worktree on branch `feat/homepage-editorial-commerce` from `design/homepage-editorial-commerce`. Verify a clean baseline before Task 1:
+Use `superpowers:using-git-worktrees` at execution time. Create branch `feat/homepage-editorial-commerce` from `design/homepage-editorial-commerce` in an isolated worktree, then verify the baseline:
 
 ```powershell
 npm test
@@ -39,7 +40,7 @@ npm run lint
 npm run build
 ```
 
-Expected: all PASS before redesign code is changed.
+Expected: all PASS before implementation starts.
 
 ---
 
@@ -47,48 +48,50 @@ Expected: all PASS before redesign code is changed.
 
 ### Create
 
-- `src/data/home-editorial-content.ts` — truthful structured data for the new homepage.
-- `src/data/home-editorial-content.test.ts` — local-image/truth guard.
-- `src/components/home/hero.test.tsx` — minimal hero contract.
-- `src/components/home/SelectedWork.tsx` — asymmetric owner-work section.
-- `src/components/home/BeforeAfterFeature.tsx` — large editing-proof section.
-- `src/components/home/WhyChooseMe.tsx` — condensed About/trust section.
-- `src/components/home/VideoFeature.tsx` — simplified videography feature.
+- `src/data/home-editorial-content.ts` — truthful content and image references for Phase 1.
+- `src/data/home-editorial-content.test.ts` — asset/truth guard.
+- `src/components/home/EditorialNavbar.tsx` — homepage-only navigation.
+- `src/components/home/EditorialNavbar.test.tsx` — navigation behavior.
+- `src/components/home/EditorialHero.tsx` — minimal full-viewport hero.
+- `src/components/home/EditorialHero.test.tsx` — hero content contract.
+- `src/components/home/EditorialServices.tsx` — three equal service choices and prices.
+- `src/components/home/EditorialServices.test.tsx` — service contract.
+- `src/components/home/SelectedWork.tsx` — asymmetric owner-work proof.
+- `src/components/home/WhyChooseMe.tsx` — condensed trust/about.
+- `src/components/home/BeforeAfterFeature.tsx` — large editing proof.
+- `src/components/home/VideoFeature.tsx` — simplified videography.
 - `src/components/home/HowItWorks.tsx` — three-step process.
-- `src/components/home/editorial-sections.test.tsx` — new section unit coverage.
+- `src/components/home/editorial-proof.test.tsx` — proof/trust/video/process unit coverage.
+- `src/components/home/EditorialReviews.tsx` — all three reviews visible.
+- `src/components/home/EditorialReviews.test.tsx` — review contract.
+- `src/components/home/EditorialFaq.tsx` — five-question accordion.
+- `src/components/home/EditorialFaq.test.tsx` — FAQ behavior.
+- `src/components/home/EditorialContact.tsx` — simplified booking form preserving existing behavior.
+- `src/components/home/EditorialContact.test.tsx` — contact behavior.
 
 ### Modify
 
-- `DESIGN.md`
-- `src/app/globals.css`
-- `src/components/home/HomePage.tsx`
+- `DESIGN.md` — retire the OpenCode-derived design direction and point to the approved spec.
+- `src/app/globals.css` — additive `--pp-*` tokens and `.home-editorial`-scoped styles only.
+- `src/components/home/HomePage.tsx` — replace old homepage composition with Editorial components.
+- `src/components/home/home-page.test.tsx` — assert scope and section order.
+- `tests/e2e/home.spec.ts` — new desktop/mobile/SSR release gate.
+- `tests/e2e/brochure-pages.spec.ts` — explicit Phase 1 isolation smoke test.
+
+### Must remain unchanged in Phase 1
+
 - `src/components/home/Navbar.tsx`
-- `src/components/home/Hero.tsx`
-- `src/components/home/Services.tsx`
-- `src/components/home/Reviews.tsx`
-- `src/components/home/Faq.tsx`
-- `src/components/home/Contact.tsx`
-- `src/components/home/home-page.test.tsx`
-- `src/components/home/navbar.test.tsx`
-- `src/components/home/services.test.tsx`
-- `src/components/home/reviews.test.tsx`
-- `src/components/home/faq.test.tsx`
-- `src/components/home/contact.test.tsx`
-- `tests/e2e/home.spec.ts`
-- `tests/e2e/brochure-pages.spec.ts`
-
-### Reuse unchanged
-
+- `src/components/site/SiteFrame.tsx`
+- `src/components/site/AboutPageView.tsx`
+- `src/components/site/ServicesHubPageView.tsx`
+- `src/components/site/ServiceDetailPageView.tsx`
 - `src/components/ui/BeforeAfterSlider.tsx`
 - `src/lib/contact.ts`
-- `src/data/home-content.ts`
-- `src/lib/content-types.ts`
-- `src/app/layout.tsx`
-- all dedicated brochure page components
+- dedicated portfolio/detail page views
 
 ---
 
-### Task 1: Establish truthful Editorial Commerce homepage data
+### Task 1: Establish truthful Editorial content and retire the stale design reference
 
 **Files:**
 - Create: `src/data/home-editorial-content.test.ts`
@@ -97,18 +100,18 @@ Expected: all PASS before redesign code is changed.
 - Required input: `public/portfolio/product-service.jpg`
 
 **Interfaces:**
-- Produces: `homeEditorialContent` with `nav`, `hero`, `services`, `selectedWork`, `why`, `beforeAfter`, `video`, `process`, `reviews`, `faq`, and `contact`.
-- All later homepage components consume this object.
+- Produces `homeEditorialContent` used by every Editorial homepage component.
+- `hero.images`, `services[*].image`, and `selectedWork[*].image` must all be local `/portfolio/...` paths.
 
-- [ ] **Step 1: Verify the owner-approved product asset exists**
+- [ ] **Step 1: Verify the owner product photograph exists**
 
 ```powershell
 Test-Path "public\portfolio\product-service.jpg"
 ```
 
-Expected: `True`. If `False`, stop Task 1 and request the owner's product photograph. Do not proceed with a stock replacement.
+Expected: `True`. If `False`, stop Task 1 and request the owner's actual product photograph. No stock substitute is allowed.
 
-- [ ] **Step 2: Write the failing data/truth test**
+- [ ] **Step 2: Write the failing truth test**
 
 Create `src/data/home-editorial-content.test.ts`:
 
@@ -118,25 +121,26 @@ import { join } from "node:path";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
 describe("homeEditorialContent", () => {
-  it("keeps hero, services, and selected work on local owner-approved assets", () => {
-    const imageSources = [
+  it("uses only local portfolio imagery for hero, services, and selected work", () => {
+    const sources = [
       ...homeEditorialContent.hero.images.map((image) => image.src),
       ...homeEditorialContent.services.map((service) => service.image.src),
       ...homeEditorialContent.selectedWork.map((item) => item.image),
     ];
 
-    expect(imageSources.every((src) => src.startsWith("/portfolio/"))).toBe(true);
-    expect(imageSources.some((src) => src.includes("images.unsplash.com"))).toBe(false);
+    expect(sources.every((source) => source.startsWith("/portfolio/"))).toBe(true);
+    expect(sources.some((source) => source.includes("unsplash"))).toBe(false);
   });
 
   it("requires the approved product photograph", () => {
-    const productImage = join(process.cwd(), "public", "portfolio", "product-service.jpg");
-    expect(existsSync(productImage)).toBe(true);
+    expect(
+      existsSync(join(process.cwd(), "public", "portfolio", "product-service.jpg")),
+    ).toBe(true);
   });
 });
 ```
 
-- [ ] **Step 3: Run the focused test and verify RED**
+- [ ] **Step 3: Run the focused test to verify RED**
 
 ```powershell
 npm test -- src/data/home-editorial-content.test.ts
@@ -144,7 +148,7 @@ npm test -- src/data/home-editorial-content.test.ts
 
 Expected: FAIL because `src/data/home-editorial-content.ts` does not exist.
 
-- [ ] **Step 4: Create the structured homepage data**
+- [ ] **Step 4: Create the content model**
 
 Create `src/data/home-editorial-content.ts`:
 
@@ -288,9 +292,7 @@ export const homeEditorialContent = {
 } as const;
 ```
 
-- [ ] **Step 5: Retire the stale OpenCode design direction**
-
-Replace `DESIGN.md` with:
+- [ ] **Step 5: Replace `DESIGN.md` with the canonical pointer**
 
 ```md
 # Pavlov Photography Design System
@@ -304,7 +306,7 @@ The canonical site-wide design is:
 Phase 1 applies this system to the homepage only. Other routes migrate later and must not be restyled accidentally by Phase 1 changes.
 ```
 
-- [ ] **Step 6: Run the focused test and verify GREEN**
+- [ ] **Step 6: Run the focused test to verify GREEN**
 
 ```powershell
 npm test -- src/data/home-editorial-content.test.ts
@@ -321,178 +323,67 @@ git commit -m "feat: define truthful editorial homepage content"
 
 ---
 
-### Task 2: Add a homepage-only design scope without affecting brochure routes
+### Task 2: Add homepage-scoped design tokens, navigation, and minimal hero
 
 **Files:**
 - Modify: `src/app/globals.css`
-- Modify: `src/components/home/HomePage.tsx`
-- Modify: `src/components/home/home-page.test.tsx`
+- Create: `src/components/home/EditorialNavbar.tsx`
+- Create: `src/components/home/EditorialNavbar.test.tsx`
+- Create: `src/components/home/EditorialHero.tsx`
+- Create: `src/components/home/EditorialHero.test.tsx`
 
 **Interfaces:**
-- Produces: `.home-editorial` and the `--pp-*` token family used by all new homepage sections.
+- `EditorialNavbar({ links })` consumes `homeEditorialContent.nav`.
+- `EditorialHero({ content })` consumes `homeEditorialContent.hero`.
+- Produces the `.home-editorial` visual token family used in Tasks 3–7.
 
-- [ ] **Step 1: Replace the stale HomePage tests with a failing scope test**
+- [ ] **Step 1: Write failing navigation test**
 
-Set `src/components/home/home-page.test.tsx` to:
+Create `src/components/home/EditorialNavbar.test.tsx`:
 
 ```tsx
-import { render } from "@testing-library/react";
-import { HomePage } from "@/components/home/HomePage";
+"use client";
 
-describe("HomePage editorial shell", () => {
-  it("scopes the Editorial Commerce system to the homepage", () => {
-    const { container } = render(<HomePage />);
-    expect(container.querySelector(".home-editorial")).toBeInTheDocument();
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { EditorialNavbar } from "@/components/home/EditorialNavbar";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+describe("EditorialNavbar", () => {
+  it("renders the approved homepage navigation and booking CTA", () => {
+    render(<EditorialNavbar links={homeEditorialContent.nav} />);
+
+    expect(screen.getByRole("link", { name: "PAVLOV PHOTOGRAPHY" })).toHaveAttribute("href", "#hero");
+    expect(screen.getByRole("link", { name: "Работа" })).toHaveAttribute("href", "#portfolio");
+    expect(screen.getByRole("link", { name: "Услуги" })).toHaveAttribute("href", "#services");
+    expect(screen.getByRole("link", { name: "За мен" })).toHaveAttribute("href", "#about");
+    expect(screen.getByRole("link", { name: "Контакт" })).toHaveAttribute("href", "#contact");
+    expect(screen.getByRole("link", { name: "Запази снимане" })).toHaveAttribute("href", "#contact");
+  });
+
+  it("opens an accessible mobile menu", async () => {
+    const user = userEvent.setup();
+    render(<EditorialNavbar links={homeEditorialContent.nav} />);
+
+    await user.click(screen.getByRole("button", { name: "Отвори менюто" }));
+    expect(screen.getByRole("button", { name: "Затвори менюто" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Работа" })).toHaveLength(2);
   });
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **Step 2: Write failing hero test**
 
-```powershell
-npm test -- src/components/home/home-page.test.tsx
-```
-
-Expected: FAIL because `.home-editorial` is not rendered.
-
-- [ ] **Step 3: Add non-breaking homepage tokens and suppress legacy ambient effects only on home**
-
-Append to `src/app/globals.css`:
-
-```css
-:root {
-  --pp-ink: #151515;
-  --pp-soft-black: #1c1b19;
-  --pp-warm-white: #f5f1e8;
-  --pp-muted: #aaa297;
-  --pp-ivory: #f2eee5;
-  --pp-paper: #e9e2d6;
-  --pp-text-dark: #191816;
-  --pp-brass: #b79052;
-  --pp-line-dark: rgba(245, 241, 232, 0.14);
-  --pp-line-light: rgba(25, 24, 22, 0.14);
-}
-
-body:has(.home-editorial) {
-  background: var(--pp-ink);
-}
-
-body:has(.home-editorial)::before,
-body:has(.home-editorial)::after {
-  opacity: 0;
-}
-
-.home-editorial {
-  min-height: 100%;
-  background: var(--pp-ink);
-  color: var(--pp-warm-white);
-}
-
-.home-editorial .pp-display {
-  font-family: var(--font-cormorant), serif;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-editorial *,
-  .home-editorial *::before,
-  .home-editorial *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-  }
-}
-```
-
-Do not change the existing legacy variables used by brochure pages.
-
-- [ ] **Step 4: Wrap the current homepage exactly, removing only PointerGlow**
-
-At this intermediate commit, use this exact `HomePage` composition so existing sections keep working while the shell is introduced:
-
-```tsx
-import { About } from "@/components/home/About";
-import { Contact } from "@/components/home/Contact";
-import { Faq } from "@/components/home/Faq";
-import { FooterCta } from "@/components/home/FooterCta";
-import { Hero } from "@/components/home/Hero";
-import { Navbar } from "@/components/home/Navbar";
-import { Portfolio } from "@/components/home/Portfolio";
-import { Reviews } from "@/components/home/Reviews";
-import { Services } from "@/components/home/Services";
-import { Terms } from "@/components/home/Terms";
-import { Videography } from "@/components/home/Videography";
-import { FloatingCallButton } from "@/components/ui/FloatingCallButton";
-import { homeContent } from "@/data/home-content";
-import { homeEditorialContent } from "@/data/home-editorial-content";
-
-export function HomePage() {
-  return (
-    <div className="home-editorial">
-      <Navbar links={homeEditorialContent.nav} />
-      <main className="relative overflow-hidden pb-24 md:pb-0">
-        <Hero content={homeContent.hero} />
-        <About content={homeContent.about} />
-        <Services content={homeContent.services} />
-        <Videography content={homeContent.videography} />
-        <Portfolio content={homeContent.portfolio} />
-        <Terms content={homeContent.terms} />
-        <Reviews content={homeContent.reviews} />
-        <Faq content={homeContent.faq} />
-        <Contact content={homeContent.contact} />
-      </main>
-      <FooterCta content={homeContent.footerCta} />
-      <FloatingCallButton phone={homeContent.contact.phone} />
-    </div>
-  );
-}
-```
-
-`PointerGlow` must no longer be imported or rendered.
-
-- [ ] **Step 5: Verify GREEN and full-suite stability**
-
-```powershell
-npm test -- src/components/home/home-page.test.tsx
-npm test
-```
-
-Expected: both PASS.
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add src/app/globals.css src/components/home/HomePage.tsx src/components/home/home-page.test.tsx
-git commit -m "feat: scope editorial visual system to homepage"
-```
-
----
-
-### Task 3: Build the minimal navbar and full-viewport hero
-
-**Files:**
-- Modify: `src/components/home/Navbar.tsx`
-- Modify: `src/components/home/Hero.tsx`
-- Modify: `src/components/home/navbar.test.tsx`
-- Create: `src/components/home/hero.test.tsx`
-- Modify: `src/components/home/HomePage.tsx`
-- Modify: `src/app/globals.css`
-
-**Interfaces:**
-- `Navbar` consumes `homeEditorialContent.nav`.
-- `Hero` consumes `homeEditorialContent.hero`.
-
-- [ ] **Step 1: Write failing hero and navbar tests**
-
-Create `src/components/home/hero.test.tsx`:
+Create `src/components/home/EditorialHero.test.tsx`:
 
 ```tsx
 import { render, screen } from "@testing-library/react";
-import { Hero } from "@/components/home/Hero";
+import { EditorialHero } from "@/components/home/EditorialHero";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
-describe("Hero", () => {
+describe("EditorialHero", () => {
   it("renders only the approved opening copy and actions", () => {
-    render(<Hero content={homeEditorialContent.hero} />);
+    render(<EditorialHero content={homeEditorialContent.hero} />);
 
     expect(screen.getByRole("heading", { name: "Снимки, които продават." })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Запази снимане" })).toHaveAttribute("href", "#contact");
@@ -503,8 +394,8 @@ describe("Hero", () => {
     expect(screen.queryByText(/От €20/i)).not.toBeInTheDocument();
   });
 
-  it("renders the three owner-approved hero images", () => {
-    render(<Hero content={homeEditorialContent.hero} />);
+  it("renders all approved hero images", () => {
+    render(<EditorialHero content={homeEditorialContent.hero} />);
     for (const image of homeEditorialContent.hero.images) {
       expect(screen.getByAltText(image.alt)).toBeInTheDocument();
     }
@@ -512,42 +403,94 @@ describe("Hero", () => {
 });
 ```
 
-Replace `navbar.test.tsx` with tests that assert:
-
-```tsx
-expect(screen.getByRole("link", { name: "PAVLOV PHOTOGRAPHY" })).toHaveAttribute("href", "#hero");
-expect(screen.getByRole("link", { name: "Работа" })).toHaveAttribute("href", "#portfolio");
-expect(screen.getByRole("link", { name: "Услуги" })).toHaveAttribute("href", "#services");
-expect(screen.getByRole("link", { name: "За мен" })).toHaveAttribute("href", "#about");
-expect(screen.getByRole("link", { name: "Контакт" })).toHaveAttribute("href", "#contact");
-expect(screen.getByRole("link", { name: "Запази снимане" })).toHaveAttribute("href", "#contact");
-expect(screen.getByRole("button", { name: "Отвори менюто" })).toBeInTheDocument();
-```
-
-- [ ] **Step 2: Verify RED**
+- [ ] **Step 3: Run both tests to verify RED**
 
 ```powershell
-npm test -- src/components/home/hero.test.tsx src/components/home/navbar.test.tsx
+npm test -- src/components/home/EditorialNavbar.test.tsx src/components/home/EditorialHero.test.tsx
 ```
 
-Expected: FAIL against the current hero/navbar.
+Expected: FAIL because both components are missing.
 
-- [ ] **Step 3: Rewrite `Hero.tsx` as a server component**
+- [ ] **Step 4: Create `EditorialNavbar.tsx`**
 
-Use:
+```tsx
+"use client";
+
+import { Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { NavLink } from "@/lib/content-types";
+
+export function EditorialNavbar({ links }: { links: readonly NavLink[] }) {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 32);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  return (
+    <header className="fixed inset-x-0 top-0 z-50">
+      <div className={isScrolled || isOpen ? "pp-nav pp-nav-solid" : "pp-nav pp-nav-clear"}>
+        <a href="#hero" className="pp-brand">PAVLOV PHOTOGRAPHY</a>
+
+        <nav className="hidden items-center gap-7 lg:flex">
+          {links.map((link) => (
+            <a key={link.href} href={link.href} className="pp-nav-link">{link.label}</a>
+          ))}
+        </nav>
+
+        <a href="#contact" className="pp-nav-cta hidden lg:inline-flex">Запази снимане</a>
+
+        <button
+          type="button"
+          className="pp-menu-button lg:hidden"
+          aria-label={isOpen ? "Затвори менюто" : "Отвори менюто"}
+          onClick={() => setIsOpen((current) => !current)}
+        >
+          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+
+        {isOpen ? (
+          <nav className="pp-mobile-menu lg:hidden">
+            {links.map((link) => (
+              <a
+                key={`${link.href}-mobile`}
+                href={link.href}
+                className="px-3 py-3 text-sm text-[var(--pp-warm-white)]"
+                onClick={() => setIsOpen(false)}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
+      </div>
+    </header>
+  );
+}
+```
+
+- [ ] **Step 5: Create `EditorialHero.tsx`**
 
 ```tsx
 import Image from "next/image";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
-type HeroContent = typeof homeEditorialContent.hero;
+type EditorialHeroContent = typeof homeEditorialContent.hero;
 
-export function Hero({ content }: { content: HeroContent }) {
+export function EditorialHero({ content }: { content: EditorialHeroContent }) {
   return (
-    <section
-      id="hero"
-      className="relative flex min-h-[100svh] items-center overflow-hidden bg-[var(--pp-ink)] px-4 pb-12 pt-24 sm:px-8 lg:px-10 xl:px-16"
-    >
+    <section id="hero" className="pp-hero">
       <div className="mx-auto grid w-full max-w-[92rem] gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
         <div className="relative z-10 max-w-2xl">
           <h1 className="pp-display text-[clamp(4rem,8vw,7.5rem)] leading-[0.82] tracking-[-0.055em] text-[var(--pp-warm-white)]">
@@ -582,107 +525,53 @@ export function Hero({ content }: { content: HeroContent }) {
 }
 ```
 
-The file must not contain `"use client"`, `Reveal`, Framer Motion, service-pricing events, stats, or service cards.
-
-- [ ] **Step 4: Keep existing Navbar state/effects but replace its derived links and JSX**
-
-In `Navbar.tsx`, keep `isScrolled`, `isOpen`, `resolveHref`, scroll effect, and body-overflow effect. Set:
-
-```tsx
-const desktopLinks = links;
-const mobileLinks = links;
-```
-
-Replace the return value with:
-
-```tsx
-return (
-  <header className="fixed inset-x-0 top-0 z-50">
-    <div className={isScrolled || isOpen ? "pp-nav pp-nav-solid" : "pp-nav pp-nav-clear"}>
-      <a href={resolveHref("#hero")} className="pp-brand">
-        PAVLOV PHOTOGRAPHY
-      </a>
-
-      <nav className="hidden items-center gap-7 lg:flex">
-        {desktopLinks.map((link) => (
-          <a key={link.href} href={resolveHref(link.href)} className="pp-nav-link">
-            {link.label}
-          </a>
-        ))}
-      </nav>
-
-      <a href={resolveHref("#contact")} className="pp-nav-cta hidden lg:inline-flex">
-        Запази снимане
-      </a>
-
-      <button
-        type="button"
-        className="pp-menu-button lg:hidden"
-        aria-label={isOpen ? "Затвори менюто" : "Отвори менюто"}
-        onClick={() => setIsOpen((open) => !open)}
-      >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
-
-      {isOpen ? (
-        <nav className="absolute inset-x-4 top-[calc(100%+0.5rem)] grid gap-1 border border-[var(--pp-line-dark)] bg-[var(--pp-soft-black)] p-3 lg:hidden">
-          {mobileLinks.map((link) => (
-            <a
-              key={`${link.href}-mobile`}
-              href={resolveHref(link.href)}
-              className="px-3 py-3 text-sm text-[var(--pp-warm-white)]"
-              onClick={() => setIsOpen(false)}
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-      ) : null}
-    </div>
-  </header>
-);
-```
-
-Remove `ApertureLogo` from this component.
-
-- [ ] **Step 5: Add exact homepage button/nav/hero-image CSS**
-
-Append inside `globals.css`:
+- [ ] **Step 6: Append the homepage-only token and hero/nav styles to `globals.css`**
 
 ```css
-.home-editorial .pp-button-primary,
-.home-editorial .pp-button-secondary,
-.home-editorial .pp-nav-cta {
-  display: inline-flex;
-  min-height: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.4rem;
-  padding: 0.78rem 1.05rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease;
+:root {
+  --pp-ink: #151515;
+  --pp-soft-black: #1c1b19;
+  --pp-warm-white: #f5f1e8;
+  --pp-muted: #aaa297;
+  --pp-ivory: #f2eee5;
+  --pp-paper: #e9e2d6;
+  --pp-text-dark: #191816;
+  --pp-brass: #b79052;
+  --pp-line-dark: rgba(245, 241, 232, 0.14);
+  --pp-line-light: rgba(25, 24, 22, 0.14);
 }
 
-.home-editorial .pp-button-primary,
-.home-editorial .pp-nav-cta {
-  background: var(--pp-warm-white);
-  color: var(--pp-text-dark);
+body:has(.home-editorial) {
+  background: var(--pp-ink);
 }
 
-.home-editorial .pp-button-secondary {
-  border: 1px solid var(--pp-line-dark);
+body:has(.home-editorial)::before,
+body:has(.home-editorial)::after {
+  opacity: 0;
+}
+
+.home-editorial {
+  min-height: 100%;
+  background: var(--pp-ink);
   color: var(--pp-warm-white);
 }
 
-.home-editorial .pp-button-primary:hover,
-.home-editorial .pp-button-secondary:hover,
-.home-editorial .pp-nav-cta:hover {
-  transform: translateY(-1px);
+.home-editorial .pp-display {
+  font-family: var(--font-cormorant), serif;
+}
+
+.home-editorial .pp-hero {
+  position: relative;
+  display: flex;
+  min-height: 100svh;
+  align-items: center;
+  overflow: hidden;
+  background: var(--pp-ink);
+  padding: 6.5rem 1rem 3rem;
 }
 
 .home-editorial .pp-nav {
+  position: relative;
   margin-inline: auto;
   display: grid;
   max-width: 96rem;
@@ -707,6 +596,31 @@ Append inside `globals.css`:
   letter-spacing: 0.08em;
 }
 
+.home-editorial .pp-nav-cta,
+.home-editorial .pp-button-primary,
+.home-editorial .pp-button-secondary {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4rem;
+  padding: 0.78rem 1.05rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.home-editorial .pp-nav-cta,
+.home-editorial .pp-button-primary {
+  background: var(--pp-warm-white);
+  color: var(--pp-text-dark);
+}
+
+.home-editorial .pp-button-secondary {
+  border: 1px solid var(--pp-line-dark);
+  color: var(--pp-warm-white);
+}
+
 .home-editorial .pp-menu-button {
   display: inline-flex;
   height: 2.75rem;
@@ -714,6 +628,16 @@ Append inside `globals.css`:
   align-items: center;
   justify-content: center;
   color: var(--pp-warm-white);
+}
+
+.home-editorial .pp-mobile-menu {
+  position: absolute;
+  inset-inline: 1rem;
+  top: calc(100% + 0.5rem);
+  display: grid;
+  border: 1px solid var(--pp-line-dark);
+  background: var(--pp-soft-black);
+  padding: 0.75rem;
 }
 
 .home-editorial .pp-hero-frame {
@@ -744,33 +668,39 @@ Append inside `globals.css`:
   transform: rotate(-2deg);
 }
 
+@media (min-width: 640px) {
+  .home-editorial .pp-hero {
+    padding-inline: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-editorial .pp-hero {
+    padding-inline: 2.5rem;
+  }
+}
+
 @media (max-width: 1023px) {
   .home-editorial .pp-nav {
     grid-template-columns: 1fr auto;
   }
+}
 
-  .home-editorial .pp-hero-frame-1 {
-    inset: 0 22% 8% 8%;
-  }
-
-  .home-editorial .pp-hero-frame-2 {
-    width: 38%;
+@media (prefers-reduced-motion: reduce) {
+  .home-editorial *,
+  .home-editorial *::before,
+  .home-editorial *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
 ```
 
-- [ ] **Step 6: Switch HomePage to the new hero**
-
-Change only the hero call at this stage:
-
-```tsx
-<Hero content={homeEditorialContent.hero} />
-```
-
-- [ ] **Step 7: Verify GREEN**
+- [ ] **Step 7: Run tests to verify GREEN**
 
 ```powershell
-npm test -- src/components/home/hero.test.tsx src/components/home/navbar.test.tsx src/components/home/home-page.test.tsx
+npm test -- src/components/home/EditorialNavbar.test.tsx src/components/home/EditorialHero.test.tsx
 ```
 
 Expected: PASS.
@@ -778,56 +708,42 @@ Expected: PASS.
 - [ ] **Step 8: Commit**
 
 ```powershell
-git add src/app/globals.css src/components/home/Navbar.tsx src/components/home/Hero.tsx src/components/home/HomePage.tsx src/components/home/hero.test.tsx src/components/home/navbar.test.tsx
-git commit -m "feat: build minimal full-viewport homepage hero"
+git add src/app/globals.css src/components/home/EditorialNavbar.tsx src/components/home/EditorialNavbar.test.tsx src/components/home/EditorialHero.tsx src/components/home/EditorialHero.test.tsx
+git commit -m "feat: add editorial homepage opening"
 ```
 
 ---
 
-### Task 4: Replace pricing tabs with services and image-led proof
+### Task 3: Build the gradual transition and three-service commercial section
 
 **Files:**
-- Modify: `src/components/home/Services.tsx`
-- Modify: `src/components/home/services.test.tsx`
-- Create: `src/components/home/SelectedWork.tsx`
-- Create: `src/components/home/BeforeAfterFeature.tsx`
-- Create: `src/components/home/editorial-sections.test.tsx`
-- Modify: `src/components/home/HomePage.tsx`
+- Create: `src/components/home/EditorialServices.tsx`
+- Create: `src/components/home/EditorialServices.test.tsx`
 - Modify: `src/app/globals.css`
 
 **Interfaces:**
-- `Services` consumes `homeEditorialContent.services`.
-- `SelectedWork` consumes `homeEditorialContent.selectedWork`.
-- `BeforeAfterFeature` consumes `homeEditorialContent.beforeAfter` and reuses `BeforeAfterSlider` unchanged.
+- Consumes `homeEditorialContent.services`.
+- Produces section id `services` used by hero CTA and E2E tests.
 
-- [ ] **Step 1: Write failing service/proof tests**
+- [ ] **Step 1: Write the failing service test**
 
-Set `services.test.tsx` to assert three deep links, all three starting prices, and no tablist. Use `getAllByText("от €30")` for the two matching €30 prices.
-
-Create `editorial-sections.test.tsx`:
+Create `src/components/home/EditorialServices.test.tsx`:
 
 ```tsx
 import { render, screen } from "@testing-library/react";
-import { BeforeAfterFeature } from "@/components/home/BeforeAfterFeature";
-import { SelectedWork } from "@/components/home/SelectedWork";
+import { EditorialServices } from "@/components/home/EditorialServices";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
-describe("homepage proof", () => {
-  it("shows curated local selected work", () => {
-    render(<SelectedWork items={homeEditorialContent.selectedWork} />);
-    expect(screen.getByText("AUTOMOTIVE · BMW M SERIES")).toBeInTheDocument();
-    expect(screen.getByText("REAL ESTATE · SOFIA")).toBeInTheDocument();
-    expect(screen.queryByText("Luxury Timepiece")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Разгледай цялото портфолио →" })).toHaveAttribute(
-      "href",
-      "/portfolio",
-    );
-  });
+describe("EditorialServices", () => {
+  it("renders three equal services with truthful starting prices", () => {
+    render(<EditorialServices services={homeEditorialContent.services} />);
 
-  it("keeps before-after as a keyboard-accessible slider", () => {
-    render(<BeforeAfterFeature content={homeEditorialContent.beforeAfter} />);
-    expect(screen.getByRole("slider", { name: "Плъзгач преди и след" })).toBeInTheDocument();
-    expect(screen.getByText("Снимането е половината работа.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Недвижими имоти/i })).toHaveAttribute("href", "/services/real-estate");
+    expect(screen.getByRole("link", { name: /Автомобили/i })).toHaveAttribute("href", "/services/automotive");
+    expect(screen.getByRole("link", { name: /Продукти/i })).toHaveAttribute("href", "/services/products");
+    expect(screen.getAllByText("от €30")).toHaveLength(2);
+    expect(screen.getByText("от €20")).toBeInTheDocument();
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
   });
 });
 ```
@@ -835,12 +751,12 @@ describe("homepage proof", () => {
 - [ ] **Step 2: Verify RED**
 
 ```powershell
-npm test -- src/components/home/services.test.tsx src/components/home/editorial-sections.test.tsx
+npm test -- src/components/home/EditorialServices.test.tsx
 ```
 
-Expected: FAIL.
+Expected: FAIL because the component is missing.
 
-- [ ] **Step 3: Rewrite `Services.tsx`**
+- [ ] **Step 3: Create `EditorialServices.tsx`**
 
 ```tsx
 import Image from "next/image";
@@ -848,7 +764,7 @@ import { homeEditorialContent } from "@/data/home-editorial-content";
 
 type Service = (typeof homeEditorialContent.services)[number];
 
-export function Services({ services }: { services: readonly Service[] }) {
+export function EditorialServices({ services }: { services: readonly Service[] }) {
   return (
     <section id="services" className="pp-services-transition scroll-mt-24">
       <div className="mx-auto max-w-[92rem] px-4 pb-24 pt-36 sm:px-8 lg:px-10 xl:px-16">
@@ -871,9 +787,7 @@ export function Services({ services }: { services: readonly Service[] }) {
                   <p className="text-sm font-semibold text-[var(--pp-text-dark)]">{service.startingPrice}</p>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-black/65">{service.audience}</p>
-                <span className="mt-7 inline-flex text-sm font-semibold text-[var(--pp-text-dark)]">
-                  Виж пакетите →
-                </span>
+                <span className="mt-7 inline-flex text-sm font-semibold">Виж пакетите →</span>
               </div>
             </a>
           ))}
@@ -884,88 +798,9 @@ export function Services({ services }: { services: readonly Service[] }) {
 }
 ```
 
-- [ ] **Step 4: Create `SelectedWork.tsx`**
+- [ ] **Step 4: Add the exact transition/card CSS**
 
-```tsx
-import Image from "next/image";
-import { homeEditorialContent } from "@/data/home-editorial-content";
-
-type WorkItem = (typeof homeEditorialContent.selectedWork)[number];
-
-const layout = {
-  wide: "md:col-span-8 aspect-[16/9]",
-  tall: "md:col-span-4 md:row-span-2 aspect-[3/4]",
-  square: "md:col-span-4 aspect-square",
-} as const;
-
-export function SelectedWork({ items }: { items: readonly WorkItem[] }) {
-  return (
-    <section id="portfolio" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
-      <div className="mx-auto max-w-[92rem]">
-        <div className="mb-10 flex items-end justify-between gap-6">
-          <h2 className="pp-display text-5xl sm:text-7xl">Избрана работа.</h2>
-          <a href="/portfolio" className="hidden text-sm font-semibold sm:inline-flex">
-            Разгледай цялото портфолио →
-          </a>
-        </div>
-        <div className="grid auto-rows-auto gap-4 md:grid-cols-12">
-          {items.map((item) => (
-            <a key={item.id} href={item.href} className={`group relative overflow-hidden ${layout[item.ratio]}`}>
-              <Image
-                src={item.image}
-                alt={item.alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 66vw"
-                className="object-cover transition-transform duration-300 group-hover:scale-[1.015]"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16">
-                <p className="text-xs font-semibold tracking-[0.08em] text-white">{item.label}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-        <a href="/portfolio" className="mt-7 inline-flex text-sm font-semibold sm:hidden">
-          Разгледай цялото портфолио →
-        </a>
-      </div>
-    </section>
-  );
-}
-```
-
-- [ ] **Step 5: Create `BeforeAfterFeature.tsx`**
-
-```tsx
-import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
-import { homeEditorialContent } from "@/data/home-editorial-content";
-
-type BeforeAfterContent = typeof homeEditorialContent.beforeAfter;
-
-export function BeforeAfterFeature({ content }: { content: BeforeAfterContent }) {
-  return (
-    <section id="before-after" className="bg-[var(--pp-soft-black)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
-      <div className="mx-auto max-w-[92rem]">
-        <h2 className="pp-display text-5xl text-[var(--pp-warm-white)] sm:text-7xl">
-          Снимането е половината работа.
-        </h2>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--pp-muted)]">
-          Всеки финален кадър преминава през корекция на светлина, цвят, перспектива и детайл.
-        </p>
-        <div className="mt-10">
-          <BeforeAfterSlider
-            beforeLabel="Преди"
-            afterLabel="След"
-            beforeImage={{ src: content.beforeImage, alt: `${content.alt} преди обработка` }}
-            afterImage={{ src: content.afterImage, alt: `${content.alt} след обработка` }}
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-```
-
-- [ ] **Step 6: Add gradual transition and service-card CSS**
+Append to `globals.css`:
 
 ```css
 .home-editorial .pp-services-transition {
@@ -988,82 +823,125 @@ export function BeforeAfterFeature({ content }: { content: BeforeAfterContent })
 }
 ```
 
-- [ ] **Step 7: Place the three sections in HomePage**
-
-Immediately after Hero:
-
-```tsx
-<Services services={homeEditorialContent.services} />
-<SelectedWork items={homeEditorialContent.selectedWork} />
-<BeforeAfterFeature content={homeEditorialContent.beforeAfter} />
-```
-
-Remove old `Services` props, old `Portfolio`, and the old before/after presentation from the rendered homepage. Do not delete their files.
-
-- [ ] **Step 8: Verify GREEN and commit**
+- [ ] **Step 5: Verify GREEN**
 
 ```powershell
-npm test -- src/components/home/services.test.tsx src/components/home/editorial-sections.test.tsx
-npm test
-git add src/app/globals.css src/components/home/Services.tsx src/components/home/services.test.tsx src/components/home/SelectedWork.tsx src/components/home/BeforeAfterFeature.tsx src/components/home/editorial-sections.test.tsx src/components/home/HomePage.tsx
-git commit -m "feat: add editorial services and portfolio proof"
+npm test -- src/components/home/EditorialServices.test.tsx
+```
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit**
+
+```powershell
+git add src/app/globals.css src/components/home/EditorialServices.tsx src/components/home/EditorialServices.test.tsx
+git commit -m "feat: add editorial service section"
 ```
 
 ---
 
-### Task 5: Add condensed trust, videography, and process sections
+### Task 4: Build image-led work, trust, and before/after proof
 
 **Files:**
+- Create: `src/components/home/SelectedWork.tsx`
 - Create: `src/components/home/WhyChooseMe.tsx`
-- Create: `src/components/home/VideoFeature.tsx`
-- Create: `src/components/home/HowItWorks.tsx`
-- Modify: `src/components/home/editorial-sections.test.tsx`
-- Modify: `src/components/home/HomePage.tsx`
+- Create: `src/components/home/BeforeAfterFeature.tsx`
+- Create: `src/components/home/editorial-proof.test.tsx`
 
 **Interfaces:**
-- `WhyChooseMe` consumes `homeEditorialContent.why`.
-- `VideoFeature` consumes `homeEditorialContent.video`.
-- `HowItWorks` consumes `homeEditorialContent.process`.
+- `SelectedWork({ items })` consumes `homeEditorialContent.selectedWork` and produces id `portfolio`.
+- `WhyChooseMe({ content })` consumes `homeEditorialContent.why` and produces id `about`.
+- `BeforeAfterFeature({ content })` consumes `homeEditorialContent.beforeAfter` and produces id `before-after`.
 
-- [ ] **Step 1: Extend tests and verify RED**
+- [ ] **Step 1: Write the failing proof tests**
 
-Add imports for the three new components and these assertions to `editorial-sections.test.tsx`:
+Create `src/components/home/editorial-proof.test.tsx`:
 
 ```tsx
-it("condenses trust into four proof points", () => {
-  render(<WhyChooseMe content={homeEditorialContent.why} />);
-  expect(screen.getByText("Ясна цена предварително")).toBeInTheDocument();
-  expect(screen.getByText("Директна комуникация с фотографа")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Повече за мен →" })).toHaveAttribute("href", "/about");
-});
+import { render, screen } from "@testing-library/react";
+import { BeforeAfterFeature } from "@/components/home/BeforeAfterFeature";
+import { SelectedWork } from "@/components/home/SelectedWork";
+import { WhyChooseMe } from "@/components/home/WhyChooseMe";
+import { homeEditorialContent } from "@/data/home-editorial-content";
 
-it("presents videography as one concise feature", () => {
-  render(<VideoFeature content={homeEditorialContent.video} />);
-  expect(screen.getByText("от €50 / видео")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Виж видеография →" })).toHaveAttribute(
-    "href",
-    "/services/videography",
-  );
-  expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
-});
+describe("Editorial proof sections", () => {
+  it("renders curated owner-approved work only", () => {
+    render(<SelectedWork items={homeEditorialContent.selectedWork} />);
+    expect(screen.getByText("AUTOMOTIVE · BMW M SERIES")).toBeInTheDocument();
+    expect(screen.getByText("REAL ESTATE · SOFIA")).toBeInTheDocument();
+    expect(screen.queryByText("Luxury Timepiece")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Разгледай цялото портфолио →" })).toHaveAttribute("href", "/portfolio");
+  });
 
-it("renders the three-step process", () => {
-  render(<HowItWorks steps={homeEditorialContent.process} />);
-  expect(screen.getByText("01")).toBeInTheDocument();
-  expect(screen.getByText("02")).toBeInTheDocument();
-  expect(screen.getByText("03")).toBeInTheDocument();
+  it("condenses trust to four proof points", () => {
+    render(<WhyChooseMe content={homeEditorialContent.why} />);
+    expect(screen.getByText("Ясна цена предварително")).toBeInTheDocument();
+    expect(screen.getByText("Директна комуникация с фотографа")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Повече за мен →" })).toHaveAttribute("href", "/about");
+  });
+
+  it("keeps the existing before-after slider", () => {
+    render(<BeforeAfterFeature content={homeEditorialContent.beforeAfter} />);
+    expect(screen.getByRole("slider", { name: "Плъзгач преди и след" })).toBeInTheDocument();
+    expect(screen.getByText("Снимането е половината работа.")).toBeInTheDocument();
+  });
 });
 ```
 
-Run:
+- [ ] **Step 2: Verify RED**
 
 ```powershell
-npm test -- src/components/home/editorial-sections.test.tsx
+npm test -- src/components/home/editorial-proof.test.tsx
 ```
 
-Expected: FAIL because the components do not exist.
+Expected: FAIL because the components are missing.
 
-- [ ] **Step 2: Create `WhyChooseMe.tsx`**
+- [ ] **Step 3: Create `SelectedWork.tsx`**
+
+```tsx
+import Image from "next/image";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+type WorkItem = (typeof homeEditorialContent.selectedWork)[number];
+
+const layout = {
+  wide: "md:col-span-8 aspect-[16/9]",
+  tall: "md:col-span-4 md:row-span-2 aspect-[3/4]",
+  square: "md:col-span-4 aspect-square",
+} as const;
+
+export function SelectedWork({ items }: { items: readonly WorkItem[] }) {
+  return (
+    <section id="portfolio" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto max-w-[92rem]">
+        <div className="mb-10 flex items-end justify-between gap-6">
+          <h2 className="pp-display text-5xl sm:text-7xl">Избрана работа.</h2>
+          <a href="/portfolio" className="hidden text-sm font-semibold sm:inline-flex">Разгледай цялото портфолио →</a>
+        </div>
+        <div className="grid gap-4 md:grid-cols-12">
+          {items.map((item) => (
+            <a key={item.id} href={item.href} className={`group relative overflow-hidden ${layout[item.ratio]}`}>
+              <Image
+                src={item.image}
+                alt={item.alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 66vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.015]"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16">
+                <p className="text-xs font-semibold tracking-[0.08em] text-white">{item.label}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+        <a href="/portfolio" className="mt-7 inline-flex text-sm font-semibold sm:hidden">Разгледай цялото портфолио →</a>
+      </div>
+    </section>
+  );
+}
+```
+
+- [ ] **Step 4: Create `WhyChooseMe.tsx`**
 
 ```tsx
 import { homeEditorialContent } from "@/data/home-editorial-content";
@@ -1082,7 +960,7 @@ export function WhyChooseMe({ content }: { content: WhyContent }) {
             <a href={content.href} className="mt-6 inline-flex text-sm font-semibold">Повече за мен →</a>
           </div>
         </div>
-        <ol className="grid gap-0 border-t border-[var(--pp-line-light)]">
+        <ol className="border-t border-[var(--pp-line-light)]">
           {content.points.map((point, index) => (
             <li key={point} className="grid grid-cols-[3rem_1fr] gap-4 border-b border-[var(--pp-line-light)] py-6">
               <span className="text-xs font-semibold">0{index + 1}</span>
@@ -1096,7 +974,142 @@ export function WhyChooseMe({ content }: { content: WhyContent }) {
 }
 ```
 
-- [ ] **Step 3: Create `VideoFeature.tsx`**
+- [ ] **Step 5: Create `BeforeAfterFeature.tsx`**
+
+```tsx
+import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+type BeforeAfterContent = typeof homeEditorialContent.beforeAfter;
+
+export function BeforeAfterFeature({ content }: { content: BeforeAfterContent }) {
+  return (
+    <section id="before-after" className="bg-[var(--pp-soft-black)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto max-w-[92rem]">
+        <h2 className="pp-display text-5xl sm:text-7xl">Снимането е половината работа.</h2>
+        <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--pp-muted)]">
+          Всеки финален кадър преминава през корекция на светлина, цвят, перспектива и детайл.
+        </p>
+        <div className="mt-10">
+          <BeforeAfterSlider
+            beforeLabel="Преди"
+            afterLabel="След"
+            beforeImage={{ src: content.beforeImage, alt: `${content.alt} преди обработка` }}
+            afterImage={{ src: content.afterImage, alt: `${content.alt} след обработка` }}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+- [ ] **Step 6: Verify GREEN**
+
+```powershell
+npm test -- src/components/home/editorial-proof.test.tsx
+```
+
+Expected: PASS.
+
+- [ ] **Step 7: Commit**
+
+```powershell
+git add src/components/home/SelectedWork.tsx src/components/home/WhyChooseMe.tsx src/components/home/BeforeAfterFeature.tsx src/components/home/editorial-proof.test.tsx
+git commit -m "feat: add editorial photography proof"
+```
+
+---
+
+### Task 5: Add videography, process, reviews, and FAQ
+
+**Files:**
+- Create: `src/components/home/VideoFeature.tsx`
+- Create: `src/components/home/HowItWorks.tsx`
+- Create: `src/components/home/EditorialReviews.tsx`
+- Create: `src/components/home/EditorialReviews.test.tsx`
+- Create: `src/components/home/EditorialFaq.tsx`
+- Create: `src/components/home/EditorialFaq.test.tsx`
+- Modify: `src/components/home/editorial-proof.test.tsx`
+
+**Interfaces:**
+- `VideoFeature({ content })` consumes `homeEditorialContent.video`, id `videography`.
+- `HowItWorks({ steps })` consumes `homeEditorialContent.process`, id `process`.
+- `EditorialReviews({ content })` consumes the readonly array `homeEditorialContent.reviews`, id `reviews`.
+- `EditorialFaq({ items })` consumes `homeEditorialContent.faq`, id `faq`.
+
+- [ ] **Step 1: Add failing video/process tests to `editorial-proof.test.tsx`**
+
+Add imports and tests:
+
+```tsx
+import { HowItWorks } from "@/components/home/HowItWorks";
+import { VideoFeature } from "@/components/home/VideoFeature";
+
+it("presents videography as one concise feature", () => {
+  render(<VideoFeature content={homeEditorialContent.video} />);
+  expect(screen.getByText("от €50 / видео")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Виж видеография →" })).toHaveAttribute("href", "/services/videography");
+  expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+});
+
+it("renders the three-step process", () => {
+  render(<HowItWorks steps={homeEditorialContent.process} />);
+  expect(screen.getByText("01")).toBeInTheDocument();
+  expect(screen.getByText("02")).toBeInTheDocument();
+  expect(screen.getByText("03")).toBeInTheDocument();
+});
+```
+
+- [ ] **Step 2: Write failing reviews test**
+
+Create `src/components/home/EditorialReviews.test.tsx`:
+
+```tsx
+import { render, screen } from "@testing-library/react";
+import { EditorialReviews } from "@/components/home/EditorialReviews";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+test("renders all three reviews without carousel controls", () => {
+  render(<EditorialReviews content={homeEditorialContent.reviews} />);
+  expect(screen.getAllByRole("article")).toHaveLength(3);
+  expect(screen.queryByRole("button", { name: /Следващ отзив/i })).not.toBeInTheDocument();
+});
+```
+
+- [ ] **Step 3: Write failing FAQ test**
+
+Create `src/components/home/EditorialFaq.test.tsx`:
+
+```tsx
+"use client";
+
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { EditorialFaq } from "@/components/home/EditorialFaq";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+test("renders five booking questions and opens an answer", async () => {
+  const user = userEvent.setup();
+  render(<EditorialFaq items={homeEditorialContent.faq} />);
+
+  expect(screen.getAllByRole("button")).toHaveLength(5);
+  const processing = screen.getByRole("button", { name: "Включена ли е обработката в цената?" });
+  await user.click(processing);
+  expect(processing).toHaveAttribute("aria-expanded", "true");
+  expect(screen.getByText(/Стандартната обработка включва светлина, цвят и изправяне/)).toBeInTheDocument();
+});
+```
+
+- [ ] **Step 4: Verify RED**
+
+```powershell
+npm test -- src/components/home/editorial-proof.test.tsx src/components/home/EditorialReviews.test.tsx src/components/home/EditorialFaq.test.tsx
+```
+
+Expected: FAIL because the new components are missing.
+
+- [ ] **Step 5: Create `VideoFeature.tsx`**
 
 ```tsx
 import Image from "next/image";
@@ -1123,14 +1136,14 @@ export function VideoFeature({ content }: { content: VideoContent }) {
 }
 ```
 
-- [ ] **Step 4: Create `HowItWorks.tsx`**
+- [ ] **Step 6: Create `HowItWorks.tsx`**
 
 ```tsx
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
-type Step = (typeof homeEditorialContent.process)[number];
+type ProcessStep = (typeof homeEditorialContent.process)[number];
 
-export function HowItWorks({ steps }: { steps: readonly Step[] }) {
+export function HowItWorks({ steps }: { steps: readonly ProcessStep[] }) {
   return (
     <section id="process" className="bg-[var(--pp-ivory)] px-4 py-24 text-[var(--pp-text-dark)] sm:px-8 lg:px-10 xl:px-16">
       <div className="mx-auto max-w-[92rem]">
@@ -1150,96 +1163,20 @@ export function HowItWorks({ steps }: { steps: readonly Step[] }) {
 }
 ```
 
-- [ ] **Step 5: Insert the sections in final order around BeforeAfter**
-
-The relevant HomePage sequence becomes:
-
-```tsx
-<SelectedWork items={homeEditorialContent.selectedWork} />
-<WhyChooseMe content={homeEditorialContent.why} />
-<BeforeAfterFeature content={homeEditorialContent.beforeAfter} />
-<VideoFeature content={homeEditorialContent.video} />
-<HowItWorks steps={homeEditorialContent.process} />
-```
-
-- [ ] **Step 6: Verify GREEN and commit**
-
-```powershell
-npm test -- src/components/home/editorial-sections.test.tsx
-npm test
-git add src/components/home/WhyChooseMe.tsx src/components/home/VideoFeature.tsx src/components/home/HowItWorks.tsx src/components/home/editorial-sections.test.tsx src/components/home/HomePage.tsx
-git commit -m "feat: add trust video and process sections"
-```
-
----
-
-### Task 6: Replace carousel trust and card-heavy contact with simpler conversion sections
-
-**Files:**
-- Modify: `src/components/home/Reviews.tsx`
-- Modify: `src/components/home/reviews.test.tsx`
-- Modify: `src/components/home/Faq.tsx`
-- Modify: `src/components/home/faq.test.tsx`
-- Modify: `src/components/home/Contact.tsx`
-- Modify: `src/components/home/contact.test.tsx`
-- Modify: `src/components/home/HomePage.tsx`
-- Modify: `src/app/globals.css`
-
-**Interfaces:**
-- `Reviews` consumes a readonly array of existing `ReviewItem` values.
-- `Faq` consumes a readonly array of existing `FaqItem` values.
-- `Contact` continues consuming existing `ContactContent` and preserves `validateContactForm()` / `submitContactForm()`.
-
-- [ ] **Step 1: Write failing tests**
-
-Update `reviews.test.tsx`:
-
-```tsx
-import { render, screen } from "@testing-library/react";
-import { Reviews } from "@/components/home/Reviews";
-import { homeEditorialContent } from "@/data/home-editorial-content";
-
-test("renders all three reviews without carousel controls", () => {
-  render(<Reviews content={homeEditorialContent.reviews} />);
-  expect(screen.getAllByRole("article")).toHaveLength(3);
-  expect(screen.queryByRole("button", { name: /Следващ отзив/i })).not.toBeInTheDocument();
-});
-```
-
-Update `faq.test.tsx` so it renders `<Faq items={homeEditorialContent.faq} />`, asserts exactly five question buttons, clicks `Включена ли е обработката в цената?`, and verifies the answer appears.
-
-Retain existing contact validation/submission tests and add:
-
-```tsx
-expect(screen.getByRole("heading", { name: "Нека заснемем следващия ви проект." })).toBeInTheDocument();
-expect(screen.getByText("Имоти · Автомобили · Продукти · Видео")).toBeInTheDocument();
-```
-
-- [ ] **Step 2: Verify RED**
-
-```powershell
-npm test -- src/components/home/reviews.test.tsx src/components/home/faq.test.tsx src/components/home/contact.test.tsx
-```
-
-Expected: FAIL.
-
-- [ ] **Step 3: Rewrite `Reviews.tsx`**
+- [ ] **Step 7: Create `EditorialReviews.tsx`**
 
 ```tsx
 import type { ReviewItem } from "@/lib/content-types";
 
-export function Reviews({ content }: { content: readonly ReviewItem[] }) {
+export function EditorialReviews({ content }: { content: readonly ReviewItem[] }) {
   return (
     <section id="reviews" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
       <div className="mx-auto max-w-[92rem]">
         <h2 className="pp-display text-5xl sm:text-7xl">Отзиви.</h2>
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
-          {content.map((review, index) => (
-            <article
-              key={`${review.author}-${review.role}`}
-              className={index === 0 ? "border-t border-[var(--pp-line-dark)] pt-7 lg:col-span-1" : "border-t border-[var(--pp-line-dark)] pt-7"}
-            >
-              <blockquote className="pp-display text-2xl leading-[1.15] text-[var(--pp-warm-white)]">“{review.quote}”</blockquote>
+          {content.map((review) => (
+            <article key={`${review.author}-${review.role}`} className="border-t border-[var(--pp-line-dark)] pt-7">
+              <blockquote className="pp-display text-2xl leading-[1.15]">“{review.quote}”</blockquote>
               <p className="mt-7 text-sm font-semibold">{review.author}</p>
               <p className="mt-1 text-xs text-[var(--pp-muted)]">{review.role}</p>
             </article>
@@ -1251,16 +1188,16 @@ export function Reviews({ content }: { content: readonly ReviewItem[] }) {
 }
 ```
 
-- [ ] **Step 4: Rewrite `Faq.tsx` as a light five-item accordion**
+- [ ] **Step 8: Create `EditorialFaq.tsx`**
 
 ```tsx
 "use client";
 
-import { useState } from "react";
 import { Plus, X } from "lucide-react";
+import { useState } from "react";
 import type { FaqItem } from "@/lib/content-types";
 
-export function Faq({ items }: { items: readonly FaqItem[] }) {
+export function EditorialFaq({ items }: { items: readonly FaqItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
@@ -1270,18 +1207,23 @@ export function Faq({ items }: { items: readonly FaqItem[] }) {
         <div className="mt-10 border-t border-[var(--pp-line-light)]">
           {items.map((item, index) => {
             const isOpen = openIndex === index;
+            const answerId = `faq-answer-${index}`;
+
             return (
               <article key={item.question} className="border-b border-[var(--pp-line-light)]">
                 <button
                   type="button"
                   className="flex w-full items-center justify-between gap-6 py-6 text-left"
                   aria-expanded={isOpen}
+                  aria-controls={answerId}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                 >
                   <span className="text-base font-medium sm:text-lg">{item.question}</span>
                   {isOpen ? <X className="h-4 w-4 shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
                 </button>
-                {isOpen ? <p className="max-w-3xl pb-6 text-sm leading-7 text-black/65">{item.answer}</p> : null}
+                {isOpen ? (
+                  <p id={answerId} className="max-w-3xl pb-6 text-sm leading-7 text-black/65">{item.answer}</p>
+                ) : null}
               </article>
             );
           })}
@@ -1292,65 +1234,213 @@ export function Faq({ items }: { items: readonly FaqItem[] }) {
 }
 ```
 
-- [ ] **Step 5: Preserve the existing Contact state/submission functions exactly and replace only its returned JSX**
+- [ ] **Step 9: Verify GREEN**
 
-Keep `initialValues`, state hooks, `canSubmit`, `updateField()`, and `handleSubmit()` unchanged. Replace the current `return` with:
-
-```tsx
-return (
-  <section id="contact" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
-    <div className="mx-auto grid max-w-[92rem] gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-      <div>
-        <h2 className="pp-display max-w-xl text-5xl leading-[0.95] sm:text-7xl">
-          Нека заснемем следващия ви проект.
-        </h2>
-        <p className="mt-6 text-sm text-[var(--pp-muted)]">Имоти · Автомобили · Продукти · Видео</p>
-        <a href={`tel:${content.phone}`} className="mt-8 inline-flex text-lg font-semibold">0889 755 406</a>
-      </div>
-
-      <form className="grid gap-5" onSubmit={handleSubmit} noValidate>
-        <label className="grid gap-2 text-sm">
-          Име
-          <input className="pp-form-input" value={values.name} onChange={(event) => updateField("name", event.target.value)} />
-          {errors.name ? <span className="form-error">{errors.name}</span> : null}
-        </label>
-        <label className="grid gap-2 text-sm">
-          Телефон
-          <input className="pp-form-input" value={values.phone} onChange={(event) => updateField("phone", event.target.value)} />
-          {errors.phone ? <span className="form-error">{errors.phone}</span> : null}
-        </label>
-        <label className="grid gap-2 text-sm">
-          Тип заснемане
-          <select className="pp-form-input" value={values.service} onChange={(event) => updateField("service", event.target.value)}>
-            <option value="">Изберете услуга</option>
-            {content.serviceOptions.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-          {errors.service ? <span className="form-error">{errors.service}</span> : null}
-        </label>
-        <label className="grid gap-2 text-sm">
-          Съобщение
-          <textarea className="pp-form-input min-h-36 resize-y" value={values.message} onChange={(event) => updateField("message", event.target.value)} />
-          {errors.message ? <span className="form-error">{errors.message}</span> : null}
-        </label>
-        <button type="submit" className="pp-button-primary mt-2 w-full" disabled={!canSubmit || isSubmitting}>
-          Изпрати запитване
-        </button>
-        {statusMessage ? (
-          <p role="status" aria-live="polite" className={statusMessage.tone === "success" ? "text-sm text-[var(--pp-warm-white)]" : "text-sm text-[#ffb9a9]"}>
-            {statusMessage.text}
-          </p>
-        ) : null}
-      </form>
-    </div>
-  </section>
-);
+```powershell
+npm test -- src/components/home/editorial-proof.test.tsx src/components/home/EditorialReviews.test.tsx src/components/home/EditorialFaq.test.tsx
 ```
 
-Remove `IconToken`, `Reveal`, and `SectionShell` imports from `Contact.tsx` after replacing the JSX.
+Expected: PASS.
 
-- [ ] **Step 6: Add homepage form CSS**
+- [ ] **Step 10: Commit**
+
+```powershell
+git add src/components/home/VideoFeature.tsx src/components/home/HowItWorks.tsx src/components/home/EditorialReviews.tsx src/components/home/EditorialReviews.test.tsx src/components/home/EditorialFaq.tsx src/components/home/EditorialFaq.test.tsx src/components/home/editorial-proof.test.tsx
+git commit -m "feat: add editorial trust and process sections"
+```
+
+---
+
+### Task 6: Build the simplified booking section without changing contact behavior
+
+**Files:**
+- Create: `src/components/home/EditorialContact.tsx`
+- Create: `src/components/home/EditorialContact.test.tsx`
+- Modify: `src/app/globals.css`
+
+**Interfaces:**
+- `EditorialContact({ content })` consumes existing `ContactContent`.
+- Reuses `validateContactForm(values)` and `submitContactForm(values, endpoint)` from `src/lib/contact.ts` unchanged.
+- Produces id `contact`.
+
+- [ ] **Step 1: Write failing contact tests**
+
+Create `src/components/home/EditorialContact.test.tsx`:
+
+```tsx
+"use client";
+
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { EditorialContact } from "@/components/home/EditorialContact";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+describe("EditorialContact", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("renders the simplified booking message", () => {
+    render(<EditorialContact content={homeEditorialContent.contact} />);
+    expect(screen.getByRole("heading", { name: "Нека заснемем следващия ви проект." })).toBeInTheDocument();
+    expect(screen.getByText("Имоти · Автомобили · Продукти · Видео")).toBeInTheDocument();
+  });
+
+  it("posts to the existing Formspree endpoint and shows success", async () => {
+    const user = userEvent.setup();
+    let resolveRequest: ((value: Response) => void) | undefined;
+    const fetchMock = vi.fn(() => new Promise<Response>((resolve) => { resolveRequest = resolve; }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<EditorialContact content={homeEditorialContent.contact} />);
+    await user.type(screen.getByLabelText("Име"), "Иван Петров");
+    await user.type(screen.getByLabelText("Телефон"), "0888 123 456");
+    await user.selectOptions(screen.getByLabelText("Тип заснемане"), "Автомобили");
+    await user.type(screen.getByLabelText("Съобщение"), "Търся автомобилна фотосесия.");
+    const submit = screen.getByRole("button", { name: "Изпрати запитване" });
+    await user.click(submit);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://formspree.io/f/mnjoooke",
+      expect.objectContaining({ method: "POST", headers: { Accept: "application/json" }, body: expect.any(FormData) }),
+    );
+    expect(submit).toBeDisabled();
+
+    resolveRequest?.(new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "Content-Type": "application/json" } }));
+    await waitFor(() => expect(screen.getByText(/Запитването беше изпратено успешно/i)).toBeInTheDocument());
+  });
+
+  it("keeps the Bulgarian Formspree rate-limit message", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ errors: [] }), { status: 429, headers: { "Content-Type": "application/json" } })));
+
+    render(<EditorialContact content={homeEditorialContent.contact} />);
+    await user.type(screen.getByLabelText("Име"), "Иван Петров");
+    await user.type(screen.getByLabelText("Телефон"), "0888 123 456");
+    await user.selectOptions(screen.getByLabelText("Тип заснемане"), "Автомобили");
+    await user.type(screen.getByLabelText("Съобщение"), "Тест за rate limit.");
+    await user.click(screen.getByRole("button", { name: "Изпрати запитване" }));
+
+    await waitFor(() => expect(screen.getByText(/Твърде много изпратени запитвания/i)).toBeInTheDocument());
+  });
+});
+```
+
+- [ ] **Step 2: Verify RED**
+
+```powershell
+npm test -- src/components/home/EditorialContact.test.tsx
+```
+
+Expected: FAIL because the component is missing.
+
+- [ ] **Step 3: Create `EditorialContact.tsx` with the complete existing behavior**
+
+```tsx
+"use client";
+
+import { useMemo, useState } from "react";
+import type { ContactContent, ContactFormValues } from "@/lib/content-types";
+import { submitContactForm, validateContactForm } from "@/lib/contact";
+
+const initialValues: ContactFormValues = {
+  name: "",
+  phone: "",
+  service: "",
+  message: "",
+};
+
+export function EditorialContact({ content }: { content: ContactContent }) {
+  const [values, setValues] = useState<ContactFormValues>(initialValues);
+  const [errors, setErrors] = useState<Partial<Record<keyof ContactFormValues, string>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
+  const canSubmit = useMemo(() => Object.values(values).every((value) => value.trim()), [values]);
+
+  function updateField<Key extends keyof ContactFormValues>(key: Key, value: ContactFormValues[Key]) {
+    setValues((current) => ({ ...current, [key]: value }));
+    setErrors((current) => ({ ...current, [key]: undefined }));
+    setStatusMessage(null);
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextErrors = validateContactForm(values);
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      setStatusMessage(null);
+      return;
+    }
+
+    setErrors({});
+    setIsSubmitting(true);
+    setStatusMessage(null);
+
+    try {
+      await submitContactForm(values, content.formEndpoint);
+      setValues(initialValues);
+      setStatusMessage({
+        tone: "success",
+        text: "Запитването беше изпратено успешно. Ще се свържа с вас възможно най-скоро.",
+      });
+    } catch (error) {
+      setStatusMessage({
+        tone: "error",
+        text: error instanceof Error ? error.message : "Не успях да изпратя запитването. Моля, опитайте отново след малко.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <section id="contact" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto grid max-w-[92rem] gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+        <div>
+          <h2 className="pp-display max-w-xl text-5xl leading-[0.95] sm:text-7xl">Нека заснемем следващия ви проект.</h2>
+          <p className="mt-6 text-sm text-[var(--pp-muted)]">Имоти · Автомобили · Продукти · Видео</p>
+          <a href={`tel:${content.phone}`} className="mt-8 inline-flex text-lg font-semibold">0889 755 406</a>
+        </div>
+
+        <form className="grid gap-5" onSubmit={handleSubmit} noValidate>
+          <label className="grid gap-2 text-sm">
+            Име
+            <input className="pp-form-input" value={values.name} onChange={(event) => updateField("name", event.target.value)} />
+            {errors.name ? <span className="form-error">{errors.name}</span> : null}
+          </label>
+          <label className="grid gap-2 text-sm">
+            Телефон
+            <input className="pp-form-input" value={values.phone} onChange={(event) => updateField("phone", event.target.value)} />
+            {errors.phone ? <span className="form-error">{errors.phone}</span> : null}
+          </label>
+          <label className="grid gap-2 text-sm">
+            Тип заснемане
+            <select className="pp-form-input" value={values.service} onChange={(event) => updateField("service", event.target.value)}>
+              <option value="">Изберете услуга</option>
+              {content.serviceOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+            {errors.service ? <span className="form-error">{errors.service}</span> : null}
+          </label>
+          <label className="grid gap-2 text-sm">
+            Съобщение
+            <textarea className="pp-form-input min-h-36 resize-y" value={values.message} onChange={(event) => updateField("message", event.target.value)} />
+            {errors.message ? <span className="form-error">{errors.message}</span> : null}
+          </label>
+          <button type="submit" className="pp-button-primary mt-2 w-full" disabled={!canSubmit || isSubmitting}>Изпрати запитване</button>
+          {statusMessage ? (
+            <p role="status" aria-live="polite" className={statusMessage.tone === "success" ? "text-sm text-[var(--pp-warm-white)]" : "text-sm text-[#ffb9a9]"}>
+              {statusMessage.text}
+            </p>
+          ) : null}
+        </form>
+      </div>
+    </section>
+  );
+}
+```
+
+- [ ] **Step 4: Add booking-form styles to `globals.css`**
 
 ```css
 .home-editorial .pp-form-input {
@@ -1372,117 +1462,122 @@ Remove `IconToken`, `Reveal`, and `SectionShell` imports from `Contact.tsx` afte
 }
 ```
 
-- [ ] **Step 7: Insert final trust/FAQ/contact tail in HomePage**
-
-After `HowItWorks`:
-
-```tsx
-<Reviews content={homeEditorialContent.reviews} />
-<Faq items={homeEditorialContent.faq} />
-<Contact content={homeEditorialContent.contact} />
-```
-
-Remove old `FooterCta` and `FloatingCallButton` from the rendered homepage. Do not delete their files.
-
-- [ ] **Step 8: Verify GREEN and commit**
+- [ ] **Step 5: Verify GREEN**
 
 ```powershell
-npm test -- src/components/home/reviews.test.tsx src/components/home/faq.test.tsx src/components/home/contact.test.tsx
-npm test
-git add src/app/globals.css src/components/home/Reviews.tsx src/components/home/reviews.test.tsx src/components/home/Faq.tsx src/components/home/faq.test.tsx src/components/home/Contact.tsx src/components/home/contact.test.tsx src/components/home/HomePage.tsx
-git commit -m "feat: simplify homepage trust and booking flow"
+npm test -- src/components/home/EditorialContact.test.tsx
+```
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit**
+
+```powershell
+git add src/app/globals.css src/components/home/EditorialContact.tsx src/components/home/EditorialContact.test.tsx
+git commit -m "feat: add editorial booking section"
 ```
 
 ---
 
-### Task 7: Final orchestration, unit gate, lint, and production build
+### Task 7: Switch only the homepage to the Editorial composition and run the local release gate
 
 **Files:**
 - Modify: `src/components/home/HomePage.tsx`
 - Modify: `src/components/home/home-page.test.tsx`
 
 **Interfaces:**
-- `HomePage` is the sole Phase 1 orchestration layer.
+- Consumes all Editorial components from Tasks 2–6.
+- Produces the final section order: `hero`, `services`, `portfolio`, `about`, `before-after`, `videography`, `process`, `reviews`, `faq`, `contact`.
 
-- [ ] **Step 1: Write the final section-order test**
+- [ ] **Step 1: Replace the stale HomePage test with the final scope/order test**
 
-Add to `home-page.test.tsx`:
+Set `src/components/home/home-page.test.tsx` to:
 
 ```tsx
-it("renders the approved conversion narrative in order", () => {
-  const { container } = render(<HomePage />);
-  const ids = Array.from(container.querySelectorAll("main > section[id]")).map((node) => node.id);
+import { render } from "@testing-library/react";
+import { HomePage } from "@/components/home/HomePage";
 
-  expect(ids).toEqual([
-    "hero",
-    "services",
-    "portfolio",
-    "about",
-    "before-after",
-    "videography",
-    "process",
-    "reviews",
-    "faq",
-    "contact",
-  ]);
+describe("HomePage Editorial Commerce composition", () => {
+  it("scopes the new visual system to the homepage", () => {
+    const { container } = render(<HomePage />);
+    expect(container.querySelector(".home-editorial")).toBeInTheDocument();
+  });
+
+  it("renders the approved conversion narrative in order", () => {
+    const { container } = render(<HomePage />);
+    const ids = Array.from(container.querySelectorAll("main > section[id]")).map((node) => node.id);
+    expect(ids).toEqual([
+      "hero",
+      "services",
+      "portfolio",
+      "about",
+      "before-after",
+      "videography",
+      "process",
+      "reviews",
+      "faq",
+      "contact",
+    ]);
+  });
 });
 ```
 
-- [ ] **Step 2: Make `HomePage.tsx` exactly the final Phase 1 orchestrator**
+- [ ] **Step 2: Verify RED**
+
+```powershell
+npm test -- src/components/home/home-page.test.tsx
+```
+
+Expected: FAIL because the old homepage is still rendered.
+
+- [ ] **Step 3: Replace `HomePage.tsx` completely**
 
 ```tsx
 import { BeforeAfterFeature } from "@/components/home/BeforeAfterFeature";
-import { Contact } from "@/components/home/Contact";
-import { Faq } from "@/components/home/Faq";
-import { Hero } from "@/components/home/Hero";
-import { HomePage as HomePageTypeGuard } from "@/components/home/HomePage";
+import { EditorialContact } from "@/components/home/EditorialContact";
+import { EditorialFaq } from "@/components/home/EditorialFaq";
+import { EditorialHero } from "@/components/home/EditorialHero";
+import { EditorialNavbar } from "@/components/home/EditorialNavbar";
+import { EditorialReviews } from "@/components/home/EditorialReviews";
+import { EditorialServices } from "@/components/home/EditorialServices";
 import { HowItWorks } from "@/components/home/HowItWorks";
-import { Navbar } from "@/components/home/Navbar";
-import { Reviews } from "@/components/home/Reviews";
 import { SelectedWork } from "@/components/home/SelectedWork";
-import { Services } from "@/components/home/Services";
 import { VideoFeature } from "@/components/home/VideoFeature";
 import { WhyChooseMe } from "@/components/home/WhyChooseMe";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
-void HomePageTypeGuard;
-
 export function HomePage() {
   return (
     <div className="home-editorial">
-      <Navbar links={homeEditorialContent.nav} />
+      <EditorialNavbar links={homeEditorialContent.nav} />
       <main className="relative overflow-x-clip">
-        <Hero content={homeEditorialContent.hero} />
-        <Services services={homeEditorialContent.services} />
+        <EditorialHero content={homeEditorialContent.hero} />
+        <EditorialServices services={homeEditorialContent.services} />
         <SelectedWork items={homeEditorialContent.selectedWork} />
         <WhyChooseMe content={homeEditorialContent.why} />
         <BeforeAfterFeature content={homeEditorialContent.beforeAfter} />
         <VideoFeature content={homeEditorialContent.video} />
         <HowItWorks steps={homeEditorialContent.process} />
-        <Reviews content={homeEditorialContent.reviews} />
-        <Faq items={homeEditorialContent.faq} />
-        <Contact content={homeEditorialContent.contact} />
+        <EditorialReviews content={homeEditorialContent.reviews} />
+        <EditorialFaq items={homeEditorialContent.faq} />
+        <EditorialContact content={homeEditorialContent.contact} />
       </main>
     </div>
   );
 }
 ```
 
-Before implementing this step, remove the two self-reference lines shown above (`import { HomePage as HomePageTypeGuard } ...` and `void HomePageTypeGuard;`). They are printed here only to make the invalid self-import explicit: the final file must contain no import from `@/components/home/HomePage`.
+Do not delete the old homepage section files; they remain available for Phase 2 migration reference.
 
-The exact final imports are therefore the section imports plus `homeEditorialContent` only.
-
-- [ ] **Step 3: Verify no legacy homepage components remain in the final render**
-
-Run:
+- [ ] **Step 4: Verify HomePage GREEN**
 
 ```powershell
-rg -n "PointerGlow|FloatingCallButton|FooterCta|<About|<Terms|<Videography|<Portfolio" src/components/home/HomePage.tsx
+npm test -- src/components/home/home-page.test.tsx
 ```
 
-Expected: no matches.
+Expected: PASS.
 
-- [ ] **Step 4: Run the full local code gate**
+- [ ] **Step 5: Run the complete unit/lint/build gate**
 
 ```powershell
 npm test
@@ -1490,54 +1585,53 @@ npm run lint
 npm run build
 ```
 
-Expected: all PASS.
+Expected: all PASS. If an old homepage unit test fails only because its component is no longer rendered, the component's own test should still pass independently; do not delete or weaken unrelated tests.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Verify shared brochure files were not changed**
+
+```powershell
+git diff design/homepage-editorial-commerce -- src/components/home/Navbar.tsx src/components/site/SiteFrame.tsx src/components/site/AboutPageView.tsx src/components/site/ServicesHubPageView.tsx src/components/site/ServiceDetailPageView.tsx
+```
+
+Expected: no output.
+
+- [ ] **Step 7: Commit**
 
 ```powershell
 git add src/components/home/HomePage.tsx src/components/home/home-page.test.tsx
-git commit -m "refactor: finalize editorial homepage composition"
+git commit -m "feat: switch homepage to editorial commerce"
 ```
 
 ---
 
-### Task 8: Responsive, SSR, non-home isolation, and safe Vercel rollout
+### Task 8: Add responsive/SSR release proof and use Vercel Preview as the production gate
 
 **Files:**
 - Modify: `tests/e2e/home.spec.ts`
 - Modify: `tests/e2e/brochure-pages.spec.ts`
 
 **Interfaces:**
-- Produces the release gate for Phase 1 and the explicit owner-preview checkpoint.
+- Produces the executable Phase 1 release gate and the owner-preview checkpoint.
 
-- [ ] **Step 1: Replace stale homepage E2E behavior with the new desktop flow**
+- [ ] **Step 1: Replace the desktop homepage E2E test**
 
-In `tests/e2e/home.spec.ts`, replace the old desktop test with:
+In `tests/e2e/home.spec.ts`, keep the existing import and replace the old desktop flow with:
 
 ```ts
-import { expect, test } from "@playwright/test";
-
 test("desktop editorial homepage stays minimal and completes booking flow", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.route("https://formspree.io/f/mnjoooke", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ ok: true }),
-    });
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
   });
 
   await page.goto("/");
-
   await expect(page.getByRole("heading", { name: "Снимки, които продават." })).toBeVisible();
   await expect(page.locator("#hero")).not.toContainText("Commercial Photography");
   await expect(page.locator("#hero")).not.toContainText("24–48ч");
   await expect(page.locator("#hero")).not.toContainText("София и региона");
   await expect(page.locator("#hero")).not.toContainText("От €20");
 
-  const servicesTop = await page.locator("#services").evaluate(
-    (element) => element.getBoundingClientRect().top,
-  );
+  const servicesTop = await page.locator("#services").evaluate((element) => element.getBoundingClientRect().top);
   expect(servicesTop).toBeGreaterThanOrEqual(890);
 
   await page.getByRole("link", { name: "Виж услугите" }).click();
@@ -1545,7 +1639,6 @@ test("desktop editorial homepage stays minimal and completes booking flow", asyn
   await expect(page.getByRole("link", { name: /Недвижими имоти/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /Автомобили/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /Продукти/i })).toBeVisible();
-
   await expect(page.locator("#reviews article")).toHaveCount(3);
 
   const slider = page.getByRole("slider", { name: "Плъзгач преди и след" });
@@ -1564,17 +1657,11 @@ test("desktop editorial homepage stays minimal and completes booking flow", asyn
   await page.getByRole("button", { name: "Изпрати запитване" }).click();
   await expect(page.getByText(/Запитването беше изпратено успешно/i)).toBeVisible();
 
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
-  ).toBe(false);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
 });
 ```
 
-Keep the existing Formspree 429/retry test, adapting only selectors if the final Contact markup requires it.
-
-- [ ] **Step 2: Replace mobile/tablet tests with minimal-opening checks**
-
-Add:
+- [ ] **Step 2: Keep the existing 429 test and replace old mobile/tablet assertions with these tests**
 
 ```ts
 test("mobile opening remains dark, complete, and uncluttered", async ({ page }) => {
@@ -1583,38 +1670,27 @@ test("mobile opening remains dark, complete, and uncluttered", async ({ page }) 
 
   await expect(page.getByRole("heading", { name: "Снимки, които продават." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Обади се сега" })).toHaveCount(0);
-
-  const servicesTop = await page.locator("#services").evaluate(
-    (element) => element.getBoundingClientRect().top,
-  );
+  const servicesTop = await page.locator("#services").evaluate((element) => element.getBoundingClientRect().top);
   expect(servicesTop).toBeGreaterThanOrEqual(834);
 
   await page.getByRole("button", { name: "Отвори менюто" }).click();
   await expect(page.locator('a[href="#portfolio"]').last()).toBeVisible();
   await expect(page.locator('a[href="#contact"]').last()).toBeVisible();
-
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
-  ).toBe(false);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
 });
 
 test("tablet homepage has no horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 });
   await page.goto("/");
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
-  ).toBe(false);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
 });
 ```
 
-- [ ] **Step 3: Add JavaScript-disabled SSR visibility proof**
+- [ ] **Step 3: Add JavaScript-disabled SSR visibility test**
 
 ```ts
 test("critical homepage content remains visible without JavaScript", async ({ browser }) => {
-  const context = await browser.newContext({
-    javaScriptEnabled: false,
-    viewport: { width: 1280, height: 900 },
-  });
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
   await page.goto("/");
 
@@ -1623,17 +1699,16 @@ test("critical homepage content remains visible without JavaScript", async ({ br
   await expect(page.locator("#services")).toContainText("Недвижими имоти");
   await expect(page.locator("#services")).toContainText("от €20");
   await expect(page.locator("#portfolio")).toContainText("BMW M SERIES");
-
   await context.close();
 });
 ```
 
-- [ ] **Step 4: Add explicit non-home isolation smoke test**
+- [ ] **Step 4: Add brochure isolation test**
 
 Append to `tests/e2e/brochure-pages.spec.ts`:
 
 ```ts
-test("phase 1 homepage scope does not leak onto brochure routes", async ({ page }) => {
+test("phase 1 homepage styling does not leak onto brochure routes", async ({ page }) => {
   for (const route of ["/about", "/services", "/services/automotive", "/portfolio"]) {
     await page.goto(route);
     await expect(page.locator(".home-editorial")).toHaveCount(0);
@@ -1642,7 +1717,7 @@ test("phase 1 homepage scope does not leak onto brochure routes", async ({ page 
 });
 ```
 
-- [ ] **Step 5: Run the complete release gate**
+- [ ] **Step 5: Run the complete local release gate**
 
 ```powershell
 npm test
@@ -1653,15 +1728,13 @@ npm run test:e2e
 
 Expected: all PASS.
 
-- [ ] **Step 6: Perform manual responsive review before pushing**
-
-Run:
+- [ ] **Step 6: Perform manual responsive review**
 
 ```powershell
 npm run dev
 ```
 
-Inspect these exact viewport sizes:
+Inspect exactly:
 
 - 390×844
 - 768×1024
@@ -1669,78 +1742,60 @@ Inspect these exact viewport sizes:
 - 1440×900
 - 1920×1080
 
-Confirm all of the following:
+At every viewport confirm: no light strip on first load; no removed hero copy; intentional image crops; gradual dark-to-warm transition; equal service weight; asymmetric portfolio; no horizontal overflow; usable mobile menu, FAQ, slider, and form.
 
-- no ivory/light strip is visible at first load;
-- hero contains no removed eyebrow, description, trust line, or service-card UI;
-- headline and both hero CTAs remain readable;
-- hero image crop looks intentional at every viewport;
-- transition from dark hero into the service section is gradual;
-- services have equal visual weight;
-- selected work is visibly asymmetric/editorial;
-- no horizontal overflow;
-- FAQ, slider, and mobile menu remain usable;
-- non-home routes look like their pre-Phase-1 versions.
-
-- [ ] **Step 7: Commit E2E release gates before remote push**
+- [ ] **Step 7: Commit the E2E release gates**
 
 ```powershell
 git add tests/e2e/home.spec.ts tests/e2e/brochure-pages.spec.ts
 git commit -m "test: gate editorial homepage rollout"
 ```
 
-- [ ] **Step 8: Push the implementation branch**
+- [ ] **Step 8: Push the feature branch**
 
 ```powershell
 git push -u origin feat/homepage-editorial-commerce
 ```
 
-Expected: Vercel creates a Preview deployment for the branch.
+Expected: Vercel creates a Preview deployment.
 
-- [ ] **Step 9: Verify Vercel Preview**
+- [ ] **Step 9: Verify Vercel Preview before asking for approval**
 
-Confirm in project `pavlov-photography`:
+Confirm project `pavlov-photography` shows:
 
-- deployment state `READY`;
-- source repository `todevan/pavlov-photography`;
+- state `READY`;
+- source repo `todevan/pavlov-photography`;
 - source branch `feat/homepage-editorial-commerce`;
-- Next.js build succeeds;
-- preview homepage matches the approved Editorial Commerce direction;
-- `/about`, `/services`, `/services/automotive`, and `/portfolio` still render normally.
+- successful Next.js build.
 
-- [ ] **Step 10: Owner visual approval gate**
+Open the preview and smoke-test `/`, `/about`, `/services`, `/services/automotive`, and `/portfolio`.
 
-Provide the Vercel Preview to the owner. Stop here until the owner explicitly approves the preview.
+- [ ] **Step 10: Stop for explicit owner visual approval**
 
-- [ ] **Step 11: Merge to production only after explicit approval**
+Do not merge or promote the preview. Present the Preview URL and wait for an explicit approval message.
 
-After approval, merge the implementation branch into `main` without force-push. Verify the resulting production deployment becomes `READY` and has both aliases:
+- [ ] **Step 11: Merge to `main` only after approval and verify production**
 
-- `pavlovphotography.eu`
-- `www.pavlovphotography.eu`
-
-Fetch the live homepage after deployment and verify the server HTML contains `Снимки, които продават.` plus service copy without critical `opacity: 0` wrappers.
+Merge without force-push. Confirm production deployment is `READY`, aliases include `pavlovphotography.eu` and `www.pavlovphotography.eu`, and live server HTML contains `Снимки, които продават.` and service copy without hidden-by-default `opacity: 0` wrappers.
 
 ---
 
-## Self-Review Checklist for the Implementer
+## Self-Review Checklist
 
-Before claiming completion, confirm:
-
-- [ ] The plan's Task 1 product-image truth gate is satisfied with owner-approved work.
-- [ ] The old OpenCode design direction is retired in `DESIGN.md`.
-- [ ] New global tokens are additive and homepage behavior is selected by `.home-editorial`.
-- [ ] The hero is server-rendered and contains only the approved minimal content.
-- [ ] No floating call CTA appears on the opening mobile viewport.
-- [ ] Services are static deep links, not tabs.
-- [ ] Selected Work contains only local owner-approved images.
+- [ ] Product photograph is real owner-approved work.
+- [ ] Old OpenCode design reference is retired.
+- [ ] Legacy shared `Navbar` and `SiteFrame` are unchanged in Phase 1.
+- [ ] New CSS is additive and activated by `.home-editorial`.
+- [ ] Hero contains only the approved minimal content.
+- [ ] First viewport does not expose the light section.
+- [ ] Transition is gradual and CSS-driven.
+- [ ] Services show the three equal categories and starting prices.
+- [ ] Selected Work contains only local owner-approved imagery.
 - [ ] Before/after keyboard behavior remains intact.
-- [ ] Why, video, and process sections match the approved narrative.
-- [ ] All three testimonials are visible without carousel interaction.
-- [ ] FAQ has exactly five booking-blocking questions.
-- [ ] Formspree behavior and error handling are unchanged.
-- [ ] `HomePage.tsx` renders section ids in the approved order.
-- [ ] Critical content is visible with JavaScript disabled.
-- [ ] Unit tests, lint, build, and Playwright pass.
+- [ ] Video/process/reviews/FAQ follow the approved compressed structure.
+- [ ] Contact still uses the existing Formspree endpoint and error behavior.
+- [ ] No floating-call CTA appears on the homepage opening.
+- [ ] Critical content remains visible without JavaScript.
 - [ ] Non-home routes do not contain `.home-editorial`.
-- [ ] Vercel Preview is approved by the owner before production merge.
+- [ ] Unit tests, lint, build, and E2E all pass.
+- [ ] Vercel Preview receives owner approval before production merge.
