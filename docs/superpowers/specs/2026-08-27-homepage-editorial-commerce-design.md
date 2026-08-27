@@ -48,13 +48,15 @@ Whenever there is a choice between a decorative card and a strong photograph, pr
 
 ## 3. Site-wide Visual System
 
-### 3.1 Scope rule
+### 3.1 Scope and Phase 1 isolation
 
 The system in this document is not a homepage-only aesthetic.
 
 Typography, color logic, spacing, image treatment, navigation behavior, button language, motion rules, and surface treatment are intended to become the shared design language of the whole site.
 
 Phase 1 applies the system only to the homepage. Later phases may migrate the remaining routes to the same system without changing the core design direction.
+
+**Site-wide design scope does not authorize accidental site-wide restyling in Phase 1.** Shared tokens and primitives introduced during the homepage work must be additive or safely scoped so existing non-home routes do not receive unintended visual or functional regressions. A shared component should change outside the homepage only when that change is explicitly required for Phase 1 and verified across every route that consumes it.
 
 ### 3.2 Color system
 
@@ -517,6 +519,8 @@ Examples of reusable primitives/tokens include:
 - focus states;
 - motion durations.
 
+Non-home consumers of existing shared components must be checked before any shared component is changed. Prefer scoped homepage variants in Phase 1 when a global change would restyle routes that are explicitly out of scope.
+
 ## 7. Responsive Behavior
 
 ### Desktop
@@ -594,7 +598,7 @@ Do not invent:
 
 The repository currently contains stock product/real-estate portfolio examples. They may remain on existing pages until separately addressed, but Phase 1 must not elevate stock imagery into hero or selected-work proof as though it were Teodor Pavlov’s own photography.
 
-A real owner-approved product photograph is required before the final production hero/selected-work composition can truthfully represent all three primary categories with portfolio evidence.
+A real owner-approved product photograph is preferred for a three-category hero. If one is unavailable during implementation, the truthful fallback is to simplify the hero image composition rather than represent stock work as portfolio evidence. This asset gap must not be hidden by misleading imagery.
 
 ## 11. Acceptance Criteria
 
@@ -608,7 +612,8 @@ Phase 1 is complete only when all of the following are true.
 - hero-to-content transition is gradual rather than a hard black-to-white cut;
 - three primary services and starting prices are easy to scan after the opening transition;
 - selected work feels like an editorial photo spread, not a SaaS card grid;
-- site-wide tokens/primitives created in Phase 1 are reusable for later route migration.
+- site-wide tokens/primitives created in Phase 1 are reusable for later route migration;
+- non-home routes do not receive unintended Phase 1 restyling or visual regression from shared/global changes.
 
 ### Functional
 
@@ -619,7 +624,8 @@ Phase 1 is complete only when all of the following are true.
 - FAQ works;
 - contact form preserves current functionality;
 - telephone action remains usable;
-- no horizontal overflow at supported viewport sizes.
+- no horizontal overflow at supported viewport sizes;
+- existing non-home routes remain accessible and functionally intact.
 
 ### Motion / rendering
 
@@ -633,6 +639,7 @@ Phase 1 is complete only when all of the following are true.
 - lint passes;
 - production `next build` passes;
 - responsive sanity checks pass on mobile, tablet, and desktop;
+- representative non-home routes receive a regression smoke check because Phase 1 may introduce shared tokens/primitives;
 - live Vercel deployment reaches `READY`;
 - `pavlovphotography.eu` and `www.pavlovphotography.eu` serve the new production deployment;
 - final live smoke check confirms the opening viewport and SSR visibility requirements.
@@ -657,6 +664,7 @@ Approved direction:
 
 - **Site-wide design system:** yes;
 - **Phase 1 implementation:** homepage only;
+- **Phase 1 isolation:** no unintended restyling of non-home routes;
 - **Primary mode:** conversion-first;
 - **Primary categories:** real estate, automotive, products equally weighted;
 - **Style:** Editorial Commerce;
