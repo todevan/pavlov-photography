@@ -1,35 +1,32 @@
-import { About } from "@/components/home/About";
-import { Contact } from "@/components/home/Contact";
+import { BeforeAfterFeature } from "@/components/home/BeforeAfterFeature";
+import { EditorialContact } from "@/components/home/EditorialContact";
+import { EditorialFaq } from "@/components/home/EditorialFaq";
 import { EditorialHero } from "@/components/home/EditorialHero";
 import { EditorialNavbar } from "@/components/home/EditorialNavbar";
+import { EditorialReviews } from "@/components/home/EditorialReviews";
 import { EditorialServices } from "@/components/home/EditorialServices";
-import { Faq } from "@/components/home/Faq";
-import { FooterCta } from "@/components/home/FooterCta";
-import { Portfolio } from "@/components/home/Portfolio";
-import { Reviews } from "@/components/home/Reviews";
-import { Terms } from "@/components/home/Terms";
-import { Videography } from "@/components/home/Videography";
-import { FloatingCallButton } from "@/components/ui/FloatingCallButton";
-import { homeContent } from "@/data/home-content";
+import { HowItWorks } from "@/components/home/HowItWorks";
+import { SelectedWork } from "@/components/home/SelectedWork";
+import { VideoFeature } from "@/components/home/VideoFeature";
+import { WhyChooseMe } from "@/components/home/WhyChooseMe";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
 export function HomePage() {
   return (
     <div className="home-editorial">
       <EditorialNavbar links={homeEditorialContent.nav} />
-      <main className="relative overflow-x-clip pb-24 md:pb-0">
+      <main className="relative overflow-x-clip">
         <EditorialHero content={homeEditorialContent.hero} />
         <EditorialServices services={homeEditorialContent.services} />
-        <About content={homeContent.about} />
-        <Videography content={homeContent.videography} />
-        <Portfolio content={homeContent.portfolio} />
-        <Terms content={homeContent.terms} />
-        <Reviews content={homeContent.reviews} />
-        <Faq content={homeContent.faq} />
-        <Contact content={homeContent.contact} />
+        <SelectedWork items={homeEditorialContent.selectedWork} />
+        <WhyChooseMe content={homeEditorialContent.why} />
+        <BeforeAfterFeature content={homeEditorialContent.beforeAfter} />
+        <VideoFeature content={homeEditorialContent.video} />
+        <HowItWorks steps={homeEditorialContent.process} />
+        <EditorialReviews content={homeEditorialContent.reviews} />
+        <EditorialFaq items={homeEditorialContent.faq} />
+        <EditorialContact content={homeEditorialContent.contact} />
       </main>
-      <FooterCta content={homeContent.footerCta} />
-      <FloatingCallButton phone={homeContent.contact.phone} />
     </div>
   );
 }
