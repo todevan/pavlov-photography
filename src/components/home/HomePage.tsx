@@ -4,6 +4,7 @@ import { EditorialFaq } from "@/components/home/EditorialFaq";
 import { EditorialHero } from "@/components/home/EditorialHero";
 import { EditorialNavbar } from "@/components/home/EditorialNavbar";
 import { EditorialReviews } from "@/components/home/EditorialReviews";
+import styles from "@/components/home/EditorialShell.module.css";
 import { EditorialServices } from "@/components/home/EditorialServices";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { SelectedWork } from "@/components/home/SelectedWork";
@@ -13,7 +14,7 @@ import { homeEditorialContent } from "@/data/home-editorial-content";
 
 export function HomePage() {
   return (
-    <div className="home-editorial">
+    <div className={`home-editorial ${styles.shell}`}>
       <EditorialNavbar links={homeEditorialContent.nav} />
       <main className="relative overflow-x-clip">
         <EditorialHero content={homeEditorialContent.hero} />
