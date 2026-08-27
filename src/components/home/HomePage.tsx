@@ -2,11 +2,11 @@ import { About } from "@/components/home/About";
 import { Contact } from "@/components/home/Contact";
 import { EditorialHero } from "@/components/home/EditorialHero";
 import { EditorialNavbar } from "@/components/home/EditorialNavbar";
+import { EditorialServices } from "@/components/home/EditorialServices";
 import { Faq } from "@/components/home/Faq";
 import { FooterCta } from "@/components/home/FooterCta";
 import { Portfolio } from "@/components/home/Portfolio";
 import { Reviews } from "@/components/home/Reviews";
-import { Services } from "@/components/home/Services";
 import { Terms } from "@/components/home/Terms";
 import { Videography } from "@/components/home/Videography";
 import { FloatingCallButton } from "@/components/ui/FloatingCallButton";
@@ -19,8 +19,8 @@ export function HomePage() {
       <EditorialNavbar links={homeEditorialContent.nav} />
       <main className="relative overflow-x-clip pb-24 md:pb-0">
         <EditorialHero content={homeEditorialContent.hero} />
+        <EditorialServices services={homeEditorialContent.services} />
         <About content={homeContent.about} />
-        <Services content={homeContent.services} />
         <Videography content={homeContent.videography} />
         <Portfolio content={homeContent.portfolio} />
         <Terms content={homeContent.terms} />
