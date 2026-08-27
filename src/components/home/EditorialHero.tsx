@@ -13,13 +13,13 @@ export function EditorialHero({ content }: EditorialHeroProps) {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[100svh] items-center overflow-hidden bg-[var(--pp-ink)] px-4 pb-14 pt-24 sm:px-8 sm:pb-16 sm:pt-28 lg:px-10 xl:px-16"
+      className="relative flex min-h-[100svh] items-center overflow-hidden bg-[var(--pp-ink)] px-5 pb-20 pt-28 sm:px-10 sm:pb-24 sm:pt-32 lg:px-14 xl:px-20"
     >
-      <div className="mx-auto grid w-full max-w-[92rem] gap-10 lg:grid-cols-[0.86fr_1.14fr] lg:items-center">
-        <div className="relative z-10 max-w-2xl">
+      <div className="mx-auto grid w-full max-w-[100rem] gap-14 sm:gap-16 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-20">
+        <div className="relative z-10 max-w-[44rem]">
           <h1
             aria-label={accessibleTitle}
-            className="pp-display text-[clamp(4.1rem,8vw,7.5rem)] leading-[0.82] tracking-[-0.055em] text-[var(--pp-warm-white)]"
+            className="pp-display text-[clamp(4.4rem,8.2vw,7.8rem)] leading-[0.82] tracking-[-0.055em] text-[var(--pp-warm-white)]"
           >
             <span className="block">{content.title.lead}</span>
             <span className="block italic text-[var(--pp-brass)]">
@@ -28,7 +28,7 @@ export function EditorialHero({ content }: EditorialHeroProps) {
             </span>
           </h1>
 
-          <div className="mt-9 flex flex-wrap gap-3 sm:mt-12">
+          <div className="mt-12 flex flex-wrap gap-4 sm:mt-14">
             <a href="#contact" className="pp-button-primary">
               {content.primaryCta}
             </a>
@@ -38,7 +38,7 @@ export function EditorialHero({ content }: EditorialHeroProps) {
           </div>
         </div>
 
-        <div className="pp-hero-spread relative min-h-[24rem] sm:min-h-[32rem] lg:min-h-[43rem]">
+        <div className="pp-hero-spread relative min-h-[26rem] sm:min-h-[36rem] lg:min-h-[46rem]">
           {content.images.map((image, index) => (
             <div key={image.src} className={`pp-hero-frame pp-hero-frame-${index + 1}`}>
               <Image
@@ -46,7 +46,7 @@ export function EditorialHero({ content }: EditorialHeroProps) {
                 alt={image.alt}
                 fill
                 priority
-                sizes="(max-width: 1024px) 78vw, 42vw"
+                sizes="(max-width: 1024px) 82vw, 48vw"
                 className="object-cover"
               />
             </div>
