@@ -11,10 +11,13 @@ describe("HomePage editorial integration", () => {
     render(<HomePage />);
 
     expect(screen.getByRole("heading", { name: /Снимки, които продават\./i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Запази снимане" })).toHaveAttribute(
-      "href",
-      "#contact",
-    );
+
+    const bookingLinks = screen.getAllByRole("link", { name: "Запази снимане" });
+    expect(bookingLinks).toHaveLength(2);
+    for (const link of bookingLinks) {
+      expect(link).toHaveAttribute("href", "#contact");
+    }
+
     expect(screen.queryByRole("button", { name: /Недвижими имоти/i })).not.toBeInTheDocument();
   });
 });
