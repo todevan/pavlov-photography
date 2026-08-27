@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Apply the approved site-wide Editorial Commerce visual system to the homepage first, producing a cleaner full-viewport dark opening, a gradual dark-to-warm page rhythm, image-led commercial proof, simplified booking flow, and no visual regressions on non-home routes.
+**Goal:** Apply the approved site-wide Editorial Commerce visual system to the homepage first, producing a minimal full-viewport dark opening, a gradual dark-to-warm scroll rhythm, image-led commercial proof, and a simpler booking path without visually changing non-home routes.
 
-**Architecture:** Keep the existing Next.js app and business/data layer. Introduce homepage-scoped design tokens and a `home-editorial` shell so Phase 1 cannot accidentally restyle brochure routes. Replace the current component-heavy homepage composition with focused server-first sections, while preserving the existing Formspree contact logic and `BeforeAfterSlider` interaction. Critical content must remain visible in SSR HTML; Framer Motion is not required for homepage visibility.
+**Architecture:** Keep the existing Next.js app and business/data layer. Add homepage-only `--pp-*` tokens and a `.home-editorial` scope so Phase 1 cannot leak onto `/about`, `/services`, or portfolio routes. Rewrite homepage sections as focused server-first components where possible; keep only genuinely interactive pieces client-side: mobile navigation, FAQ, contact form, and the existing `BeforeAfterSlider`. Critical content must exist and remain visible in SSR HTML.
 
 **Tech Stack:** Next.js 16.2.3, React 19.2.4, TypeScript 5, Tailwind CSS 4, Vitest 4.1.4, Testing Library, Playwright 1.59.1, Next Image, existing Formspree contact integration.
 
@@ -13,19 +13,33 @@
 ## Global Constraints
 
 - The visual system is site-wide; Phase 1 implementation changes the homepage only.
-- `/about`, `/services`, `/services/*`, `/portfolio`, and `/portfolio/*` must not receive unintended Phase 1 restyling.
-- The initial viewport must be one complete dark composition; the next light section must not visibly intrude on normal desktop or mobile viewport heights.
-- Hero content is limited to navigation, `Снимки, които продават.`, the two actions `Запази снимане` and `Виж услугите`, and photography.
-- Do not render the removed eyebrow, decorative line, supporting paragraph, trust signals, service cards, icons, or emoji-like metadata inside the hero.
-- The hero-to-content transition must be gradual; no hard black-to-white cut immediately below the hero.
-- Do not present Unsplash or other stock imagery as Teodor Pavlov's portfolio work.
-- One owner-approved product photograph must exist at `public/portfolio/product-service.jpg` before Task 1 can become green. Do not substitute stock imagery for this file.
-- Critical headings, service names, prices, portfolio proof, and booking controls must be visible without JavaScript animation.
-- Preserve the existing Formspree endpoint and form validation behavior unless a test proves an existing defect.
-- Preserve keyboard access for the before/after slider, mobile menu, FAQ, and form controls.
+- `/about`, `/services`, `/services/*`, `/portfolio`, and `/portfolio/*` must not receive unintended Phase 1 visual changes.
+- The initial viewport must be one complete dark composition. The next light section must not visibly intrude at first load on standard desktop or mobile viewport heights.
+- Hero content is limited to navigation, `Снимки, които продават.`, `Запази снимане`, `Виж услугите`, and photography.
+- Do not render the removed eyebrow, decorative line, supporting paragraph, trust signals, hero service cards, icons, or emoji-like metadata.
+- The hero-to-content transition must be gradual and CSS-driven; do not use a hard black-to-white cut immediately below the hero.
+- Do not present Unsplash or other stock imagery as Teodor Pavlov's work.
+- One owner-approved product photograph must be supplied as `public/portfolio/product-service.jpg` before Task 1 can become green. Do not substitute stock imagery.
+- Hero headings, service names/prices, selected work, booking controls, and other critical content must be visible without JavaScript animation.
+- Preserve the existing Formspree endpoint and contact validation/submission behavior.
+- Preserve keyboard access for the mobile menu, FAQ, before/after slider, and form controls.
 - Respect `prefers-reduced-motion`.
-- Do not add dependencies unless an existing dependency cannot satisfy a requirement.
-- Push implementation to a feature branch and use a Vercel Preview for visual approval. Do not merge to `main` until the owner approves the preview.
+- Do not add dependencies.
+- Do not delete old homepage components during Phase 1. Leave unused legacy components in place until the later site-wide migration, reducing risk during this redesign.
+- Implement on an isolated feature branch/worktree created from `design/homepage-editorial-commerce` at execution time. Do not implement directly on `main`.
+- Push the implementation branch to obtain a Vercel Preview. Do not merge to `main` until the owner explicitly approves that preview.
+
+## Execution Preflight
+
+At execution time, use the `superpowers:using-git-worktrees` skill and create an isolated worktree on branch `feat/homepage-editorial-commerce` from `design/homepage-editorial-commerce`. Verify a clean baseline before Task 1:
+
+```powershell
+npm test
+npm run lint
+npm run build
+```
+
+Expected: all PASS before redesign code is changed.
 
 ---
 
@@ -33,71 +47,68 @@
 
 ### Create
 
-- `src/data/home-editorial-content.ts` — canonical structured content for the new homepage composition, derived from existing truthful content where possible.
-- `src/data/home-editorial-content.test.ts` — truth/asset guard preventing stock imagery from entering hero, service, or selected-work data.
-- `src/components/home/SelectedWork.tsx` — asymmetric owner-work proof section.
-- `src/components/home/BeforeAfterFeature.tsx` — large before/after proof wrapper around the existing slider.
-- `src/components/home/WhyChooseMe.tsx` — condensed About/trust content.
+- `src/data/home-editorial-content.ts` — truthful structured data for the new homepage.
+- `src/data/home-editorial-content.test.ts` — local-image/truth guard.
+- `src/components/home/hero.test.tsx` — minimal hero contract.
+- `src/components/home/SelectedWork.tsx` — asymmetric owner-work section.
+- `src/components/home/BeforeAfterFeature.tsx` — large editing-proof section.
+- `src/components/home/WhyChooseMe.tsx` — condensed About/trust section.
 - `src/components/home/VideoFeature.tsx` — simplified videography feature.
-- `src/components/home/HowItWorks.tsx` — three-step process section.
-- `src/components/home/editorial-sections.test.tsx` — focused unit coverage for the new static homepage sections.
+- `src/components/home/HowItWorks.tsx` — three-step process.
+- `src/components/home/editorial-sections.test.tsx` — new section unit coverage.
 
 ### Modify
 
-- `DESIGN.md` — retire the old OpenCode-derived visual direction and point agents to the approved site-wide Editorial Commerce system.
-- `src/app/globals.css` — add non-breaking `--pp-*` design tokens and homepage-only selectors; suppress legacy body grid/pointer effects only when `.home-editorial` exists.
-- `src/components/home/HomePage.tsx` — new section orchestration; remove `PointerGlow`, legacy `FooterCta`, and `FloatingCallButton` from the homepage opening experience.
-- `src/components/home/Navbar.tsx` — minimal non-pill navigation and booking CTA.
-- `src/components/home/Hero.tsx` — server-first full-viewport hero with image spread and no explanatory clutter.
-- `src/components/home/Services.tsx` — static three-service commercial cards with starting prices and deep links.
-- `src/components/home/Reviews.tsx` — three testimonials visible without carousel interaction.
-- `src/components/home/Faq.tsx` — keep the interaction but present only the five booking-blocking questions.
-- `src/components/home/Contact.tsx` — simplify visual layout while preserving form behavior.
-- `src/components/home/home-page.test.tsx` — new homepage composition assertions.
-- `src/components/home/navbar.test.tsx` — new navigation geometry/copy assertions.
-- `src/components/home/services.test.tsx` — replace tab behavior tests with service-card/deep-link assertions.
-- `src/components/home/reviews.test.tsx` — assert all three reviews are rendered simultaneously.
-- `src/components/home/faq.test.tsx` — assert the shortened FAQ content and accordion behavior.
-- `src/components/home/contact.test.tsx` — keep validation/submission coverage and assert simplified booking copy.
-- `tests/e2e/home.spec.ts` — rewrite homepage flow for the new architecture, viewport rules, SSR visibility, mobile layout, contact form, and no horizontal overflow.
-- `tests/e2e/brochure-pages.spec.ts` — add explicit Phase 1 isolation smoke assertions for non-home routes.
+- `DESIGN.md`
+- `src/app/globals.css`
+- `src/components/home/HomePage.tsx`
+- `src/components/home/Navbar.tsx`
+- `src/components/home/Hero.tsx`
+- `src/components/home/Services.tsx`
+- `src/components/home/Reviews.tsx`
+- `src/components/home/Faq.tsx`
+- `src/components/home/Contact.tsx`
+- `src/components/home/home-page.test.tsx`
+- `src/components/home/navbar.test.tsx`
+- `src/components/home/services.test.tsx`
+- `src/components/home/reviews.test.tsx`
+- `src/components/home/faq.test.tsx`
+- `src/components/home/contact.test.tsx`
+- `tests/e2e/home.spec.ts`
+- `tests/e2e/brochure-pages.spec.ts`
 
-### Reuse unchanged unless a failing test proves otherwise
+### Reuse unchanged
 
 - `src/components/ui/BeforeAfterSlider.tsx`
 - `src/lib/contact.ts`
 - `src/data/home-content.ts`
-- `src/lib/content-types.ts` existing legacy interfaces
+- `src/lib/content-types.ts`
 - `src/app/layout.tsx`
-- dedicated brochure page components
+- all dedicated brochure page components
 
 ---
 
-### Task 1: Truthful editorial content and product-asset gate
+### Task 1: Establish truthful Editorial Commerce homepage data
 
 **Files:**
 - Create: `src/data/home-editorial-content.test.ts`
 - Create: `src/data/home-editorial-content.ts`
 - Modify: `DESIGN.md`
-- Required asset: `public/portfolio/product-service.jpg`
+- Required input: `public/portfolio/product-service.jpg`
 
 **Interfaces:**
-- Produces: `homeEditorialContent` with `hero`, `services`, `selectedWork`, `why`, `video`, `process`, `reviews`, `faq`, and `contact` properties.
-- Later tasks consume the exact object exported as `homeEditorialContent`.
+- Produces: `homeEditorialContent` with `nav`, `hero`, `services`, `selectedWork`, `why`, `beforeAfter`, `video`, `process`, `reviews`, `faq`, and `contact`.
+- All later homepage components consume this object.
 
-- [ ] **Step 1: Verify the owner-approved product asset is present**
-
-Run from repo root:
+- [ ] **Step 1: Verify the owner-approved product asset exists**
 
 ```powershell
 Test-Path "public\portfolio\product-service.jpg"
 ```
 
-Expected: `True`.
+Expected: `True`. If `False`, stop Task 1 and request the owner's product photograph. Do not proceed with a stock replacement.
 
-If the result is `False`, stop this task and request the owner-approved product photograph. Do not use the existing Unsplash product images as a substitute.
-
-- [ ] **Step 2: Write the failing truth/asset test**
+- [ ] **Step 2: Write the failing data/truth test**
 
 Create `src/data/home-editorial-content.test.ts`:
 
@@ -107,7 +118,7 @@ import { join } from "node:path";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
 describe("homeEditorialContent", () => {
-  it("uses only local owner-approved imagery for hero, services, and selected work", () => {
+  it("keeps hero, services, and selected work on local owner-approved assets", () => {
     const imageSources = [
       ...homeEditorialContent.hero.images.map((image) => image.src),
       ...homeEditorialContent.services.map((service) => service.image.src),
@@ -118,27 +129,24 @@ describe("homeEditorialContent", () => {
     expect(imageSources.some((src) => src.includes("images.unsplash.com"))).toBe(false);
   });
 
-  it("requires the approved product photograph to exist", () => {
-    expect(
-      existsSync(join(process.cwd(), "public", "portfolio", "product-service.jpg")),
-    ).toBe(true);
+  it("requires the approved product photograph", () => {
+    const productImage = join(process.cwd(), "public", "portfolio", "product-service.jpg");
+    expect(existsSync(productImage)).toBe(true);
   });
 });
 ```
 
 - [ ] **Step 3: Run the focused test and verify RED**
 
-Run:
-
 ```powershell
 npm test -- src/data/home-editorial-content.test.ts
 ```
 
-Expected: FAIL because `@/data/home-editorial-content` does not exist yet.
+Expected: FAIL because `src/data/home-editorial-content.ts` does not exist.
 
 - [ ] **Step 4: Create the structured homepage data**
 
-Create `src/data/home-editorial-content.ts` with this shape and truthful source values:
+Create `src/data/home-editorial-content.ts`:
 
 ```ts
 import { homeContent } from "@/data/home-content";
@@ -280,25 +288,23 @@ export const homeEditorialContent = {
 } as const;
 ```
 
-- [ ] **Step 5: Retire the stale OpenCode design reference**
+- [ ] **Step 5: Retire the stale OpenCode design direction**
 
-Replace `DESIGN.md` with a short canonical pointer:
+Replace `DESIGN.md` with:
 
 ```md
 # Pavlov Photography Design System
 
 The previous OpenCode-derived terminal visual direction is retired.
 
-The canonical site-wide visual system is:
+The canonical site-wide design is:
 
 `docs/superpowers/specs/2026-08-27-homepage-editorial-commerce-design.md`
 
-Phase 1 applies that system to the homepage only. Other routes migrate later and must not be restyled accidentally by Phase 1 changes.
+Phase 1 applies this system to the homepage only. Other routes migrate later and must not be restyled accidentally by Phase 1 changes.
 ```
 
-- [ ] **Step 6: Run the truth test and verify GREEN**
-
-Run:
+- [ ] **Step 6: Run the focused test and verify GREEN**
 
 ```powershell
 npm test -- src/data/home-editorial-content.test.ts
@@ -315,7 +321,7 @@ git commit -m "feat: define truthful editorial homepage content"
 
 ---
 
-### Task 2: Homepage-scoped visual foundation
+### Task 2: Add a homepage-only design scope without affecting brochure routes
 
 **Files:**
 - Modify: `src/app/globals.css`
@@ -323,43 +329,35 @@ git commit -m "feat: define truthful editorial homepage content"
 - Modify: `src/components/home/home-page.test.tsx`
 
 **Interfaces:**
-- Produces: `.home-editorial` root scope and `--pp-*` design tokens.
-- Later homepage components rely on `--pp-ink`, `--pp-soft-black`, `--pp-warm-white`, `--pp-ivory`, `--pp-paper`, `--pp-text-dark`, and `--pp-brass`.
+- Produces: `.home-editorial` and the `--pp-*` token family used by all new homepage sections.
 
-- [ ] **Step 1: Replace the old HomePage test with a failing scope test**
+- [ ] **Step 1: Replace the stale HomePage tests with a failing scope test**
 
-In `src/components/home/home-page.test.tsx`, add:
+Set `src/components/home/home-page.test.tsx` to:
 
 ```tsx
 import { render } from "@testing-library/react";
 import { HomePage } from "@/components/home/HomePage";
 
 describe("HomePage editorial shell", () => {
-  it("scopes the new visual system to the homepage", () => {
+  it("scopes the Editorial Commerce system to the homepage", () => {
     const { container } = render(<HomePage />);
     expect(container.querySelector(".home-editorial")).toBeInTheDocument();
-  });
-
-  it("does not mount the legacy pointer glow", () => {
-    const { container } = render(<HomePage />);
-    expect(container.querySelector('[data-testid="pointer-glow"]')).not.toBeInTheDocument();
   });
 });
 ```
 
-If `PointerGlow` does not expose a test id, remove the second assertion and instead assert in code review that `HomePage.tsx` no longer imports it. Do not add testing-only production markup.
-
-- [ ] **Step 2: Run the focused test and verify RED**
+- [ ] **Step 2: Verify RED**
 
 ```powershell
 npm test -- src/components/home/home-page.test.tsx
 ```
 
-Expected: FAIL because `.home-editorial` is absent.
+Expected: FAIL because `.home-editorial` is not rendered.
 
-- [ ] **Step 3: Add new non-breaking design tokens and route scope**
+- [ ] **Step 3: Add non-breaking homepage tokens and suppress legacy ambient effects only on home**
 
-Append to `src/app/globals.css` without changing the legacy `--background`, `--surface`, or existing brochure-route classes:
+Append to `src/app/globals.css`:
 
 ```css
 :root {
@@ -405,33 +403,60 @@ body:has(.home-editorial)::after {
 }
 ```
 
-- [ ] **Step 4: Scope HomePage and remove legacy ambient effects**
+Do not change the existing legacy variables used by brochure pages.
 
-Change `HomePage.tsx` root to:
+- [ ] **Step 4: Wrap the current homepage exactly, removing only PointerGlow**
+
+At this intermediate commit, use this exact `HomePage` composition so existing sections keep working while the shell is introduced:
 
 ```tsx
+import { About } from "@/components/home/About";
+import { Contact } from "@/components/home/Contact";
+import { Faq } from "@/components/home/Faq";
+import { FooterCta } from "@/components/home/FooterCta";
+import { Hero } from "@/components/home/Hero";
+import { Navbar } from "@/components/home/Navbar";
+import { Portfolio } from "@/components/home/Portfolio";
+import { Reviews } from "@/components/home/Reviews";
+import { Services } from "@/components/home/Services";
+import { Terms } from "@/components/home/Terms";
+import { Videography } from "@/components/home/Videography";
+import { FloatingCallButton } from "@/components/ui/FloatingCallButton";
+import { homeContent } from "@/data/home-content";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
 export function HomePage() {
   return (
     <div className="home-editorial">
       <Navbar links={homeEditorialContent.nav} />
-      <main className="relative overflow-x-clip">
-        {/* existing sections remain temporarily; later tasks replace them */}
+      <main className="relative overflow-hidden pb-24 md:pb-0">
+        <Hero content={homeContent.hero} />
+        <About content={homeContent.about} />
+        <Services content={homeContent.services} />
+        <Videography content={homeContent.videography} />
+        <Portfolio content={homeContent.portfolio} />
+        <Terms content={homeContent.terms} />
+        <Reviews content={homeContent.reviews} />
+        <Faq content={homeContent.faq} />
+        <Contact content={homeContent.contact} />
       </main>
+      <FooterCta content={homeContent.footerCta} />
+      <FloatingCallButton phone={homeContent.contact.phone} />
     </div>
   );
 }
 ```
 
-Remove imports/usages of `PointerGlow` from `HomePage.tsx`. Do not change brochure layout components.
+`PointerGlow` must no longer be imported or rendered.
 
-- [ ] **Step 5: Run focused and full unit tests**
+- [ ] **Step 5: Verify GREEN and full-suite stability**
 
 ```powershell
 npm test -- src/components/home/home-page.test.tsx
 npm test
 ```
 
-Expected: focused test PASS; full suite PASS or only expected failures from tests intentionally replaced by later redesign tasks. If unrelated tests fail, stop and fix before continuing.
+Expected: both PASS.
 
 - [ ] **Step 6: Commit**
 
@@ -442,7 +467,7 @@ git commit -m "feat: scope editorial visual system to homepage"
 
 ---
 
-### Task 3: Minimal navbar and full-viewport hero
+### Task 3: Build the minimal navbar and full-viewport hero
 
 **Files:**
 - Modify: `src/components/home/Navbar.tsx`
@@ -450,14 +475,15 @@ git commit -m "feat: scope editorial visual system to homepage"
 - Modify: `src/components/home/navbar.test.tsx`
 - Create: `src/components/home/hero.test.tsx`
 - Modify: `src/components/home/HomePage.tsx`
+- Modify: `src/app/globals.css`
 
 **Interfaces:**
 - `Navbar` consumes `homeEditorialContent.nav`.
-- `Hero` consumes `homeEditorialContent.hero` with `title`, `primaryCta`, `secondaryCta`, and `images`.
+- `Hero` consumes `homeEditorialContent.hero`.
 
-- [ ] **Step 1: Write failing navbar and hero tests**
+- [ ] **Step 1: Write failing hero and navbar tests**
 
-Add/replace tests with:
+Create `src/components/home/hero.test.tsx`:
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -471,14 +497,13 @@ describe("Hero", () => {
     expect(screen.getByRole("heading", { name: "Снимки, които продават." })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Запази снимане" })).toHaveAttribute("href", "#contact");
     expect(screen.getByRole("link", { name: "Виж услугите" })).toHaveAttribute("href", "#services");
-
     expect(screen.queryByText(/Commercial Photography/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/24–48ч/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/София и региона/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/От €20/i)).not.toBeInTheDocument();
   });
 
-  it("renders all approved hero photographs with meaningful alt text", () => {
+  it("renders the three owner-approved hero images", () => {
     render(<Hero content={homeEditorialContent.hero} />);
     for (const image of homeEditorialContent.hero.images) {
       expect(screen.getByAltText(image.alt)).toBeInTheDocument();
@@ -487,21 +512,29 @@ describe("Hero", () => {
 });
 ```
 
-Update `navbar.test.tsx` to assert brand, four links, booking CTA, and mobile menu button.
+Replace `navbar.test.tsx` with tests that assert:
 
-- [ ] **Step 2: Run focused tests and verify RED**
+```tsx
+expect(screen.getByRole("link", { name: "PAVLOV PHOTOGRAPHY" })).toHaveAttribute("href", "#hero");
+expect(screen.getByRole("link", { name: "Работа" })).toHaveAttribute("href", "#portfolio");
+expect(screen.getByRole("link", { name: "Услуги" })).toHaveAttribute("href", "#services");
+expect(screen.getByRole("link", { name: "За мен" })).toHaveAttribute("href", "#about");
+expect(screen.getByRole("link", { name: "Контакт" })).toHaveAttribute("href", "#contact");
+expect(screen.getByRole("link", { name: "Запази снимане" })).toHaveAttribute("href", "#contact");
+expect(screen.getByRole("button", { name: "Отвори менюто" })).toBeInTheDocument();
+```
+
+- [ ] **Step 2: Verify RED**
 
 ```powershell
 npm test -- src/components/home/hero.test.tsx src/components/home/navbar.test.tsx
 ```
 
-Expected: FAIL because current hero still renders description/stats/cards and old navbar geometry/copy.
+Expected: FAIL against the current hero/navbar.
 
-- [ ] **Step 3: Rewrite Hero as server-first content**
+- [ ] **Step 3: Rewrite `Hero.tsx` as a server component**
 
-Remove `"use client"`, `useState`, Framer Motion, `Reveal`, service-pricing events, stats, and hero service cards. Use `next/image` and a single composed spread.
-
-Target structure:
+Use:
 
 ```tsx
 import Image from "next/image";
@@ -518,7 +551,7 @@ export function Hero({ content }: { content: HeroContent }) {
       <div className="mx-auto grid w-full max-w-[92rem] gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
         <div className="relative z-10 max-w-2xl">
           <h1 className="pp-display text-[clamp(4rem,8vw,7.5rem)] leading-[0.82] tracking-[-0.055em] text-[var(--pp-warm-white)]">
-            <span className="block">{content.title.lead}</span>
+            <span className="block">{content.title.lead}</span>{" "}
             <span className="block italic text-[var(--pp-brass)]">
               {content.title.accent}{content.title.tail}
             </span>
@@ -529,7 +562,7 @@ export function Hero({ content }: { content: HeroContent }) {
           </div>
         </div>
 
-        <div className="relative min-h-[24rem] sm:min-h-[32rem] lg:min-h-[42rem]">
+        <div className="relative min-h-[25rem] sm:min-h-[34rem] lg:min-h-[43rem]">
           {content.images.map((image, index) => (
             <div key={image.src} className={`pp-hero-frame pp-hero-frame-${index + 1}`}>
               <Image
@@ -549,111 +582,265 @@ export function Hero({ content }: { content: HeroContent }) {
 }
 ```
 
-Add the `pp-button-*` and `pp-hero-frame-*` scoped rules in `globals.css`; keep radii restrained and avoid card chrome.
+The file must not contain `"use client"`, `Reveal`, Framer Motion, service-pricing events, stats, or service cards.
 
-- [ ] **Step 4: Simplify Navbar**
+- [ ] **Step 4: Keep existing Navbar state/effects but replace its derived links and JSX**
 
-Keep scroll state and accessible mobile menu, but remove the floating capsule geometry. Use a simple full-width header, text brand, four links, and `Запази снимане` CTA.
-
-Key structure:
+In `Navbar.tsx`, keep `isScrolled`, `isOpen`, `resolveHref`, scroll effect, and body-overflow effect. Set:
 
 ```tsx
-<header className="fixed inset-x-0 top-0 z-50">
-  <div className={isScrolled || isOpen ? "pp-nav pp-nav-solid" : "pp-nav pp-nav-clear"}>
-    <a href="#hero" className="pp-brand">PAVLOV PHOTOGRAPHY</a>
-    <nav className="hidden lg:flex">...</nav>
-    <a href="#contact" className="pp-nav-cta hidden lg:inline-flex">Запази снимане</a>
-    <button aria-label={isOpen ? "Затвори менюто" : "Отвори менюто"}>...</button>
-  </div>
-</header>
+const desktopLinks = links;
+const mobileLinks = links;
 ```
 
-- [ ] **Step 5: Render new hero in HomePage**
+Replace the return value with:
 
-Use:
+```tsx
+return (
+  <header className="fixed inset-x-0 top-0 z-50">
+    <div className={isScrolled || isOpen ? "pp-nav pp-nav-solid" : "pp-nav pp-nav-clear"}>
+      <a href={resolveHref("#hero")} className="pp-brand">
+        PAVLOV PHOTOGRAPHY
+      </a>
+
+      <nav className="hidden items-center gap-7 lg:flex">
+        {desktopLinks.map((link) => (
+          <a key={link.href} href={resolveHref(link.href)} className="pp-nav-link">
+            {link.label}
+          </a>
+        ))}
+      </nav>
+
+      <a href={resolveHref("#contact")} className="pp-nav-cta hidden lg:inline-flex">
+        Запази снимане
+      </a>
+
+      <button
+        type="button"
+        className="pp-menu-button lg:hidden"
+        aria-label={isOpen ? "Затвори менюто" : "Отвори менюто"}
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+
+      {isOpen ? (
+        <nav className="absolute inset-x-4 top-[calc(100%+0.5rem)] grid gap-1 border border-[var(--pp-line-dark)] bg-[var(--pp-soft-black)] p-3 lg:hidden">
+          {mobileLinks.map((link) => (
+            <a
+              key={`${link.href}-mobile`}
+              href={resolveHref(link.href)}
+              className="px-3 py-3 text-sm text-[var(--pp-warm-white)]"
+              onClick={() => setIsOpen(false)}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      ) : null}
+    </div>
+  </header>
+);
+```
+
+Remove `ApertureLogo` from this component.
+
+- [ ] **Step 5: Add exact homepage button/nav/hero-image CSS**
+
+Append inside `globals.css`:
+
+```css
+.home-editorial .pp-button-primary,
+.home-editorial .pp-button-secondary,
+.home-editorial .pp-nav-cta {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4rem;
+  padding: 0.78rem 1.05rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.home-editorial .pp-button-primary,
+.home-editorial .pp-nav-cta {
+  background: var(--pp-warm-white);
+  color: var(--pp-text-dark);
+}
+
+.home-editorial .pp-button-secondary {
+  border: 1px solid var(--pp-line-dark);
+  color: var(--pp-warm-white);
+}
+
+.home-editorial .pp-button-primary:hover,
+.home-editorial .pp-button-secondary:hover,
+.home-editorial .pp-nav-cta:hover {
+  transform: translateY(-1px);
+}
+
+.home-editorial .pp-nav {
+  margin-inline: auto;
+  display: grid;
+  max-width: 96rem;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: calc(1rem + env(safe-area-inset-top)) 1rem 1rem;
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.home-editorial .pp-nav-solid {
+  border-bottom: 1px solid var(--pp-line-dark);
+  background: rgba(21, 21, 21, 0.9);
+  backdrop-filter: blur(14px);
+}
+
+.home-editorial .pp-brand,
+.home-editorial .pp-nav-link {
+  color: var(--pp-warm-white);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.home-editorial .pp-menu-button {
+  display: inline-flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--pp-warm-white);
+}
+
+.home-editorial .pp-hero-frame {
+  position: absolute;
+  overflow: hidden;
+  border-radius: 0.45rem;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.home-editorial .pp-hero-frame-1 {
+  inset: 0 28% 10% 8%;
+  transform: rotate(-1.4deg);
+}
+
+.home-editorial .pp-hero-frame-2 {
+  top: 12%;
+  right: 0;
+  bottom: 0;
+  width: 42%;
+  transform: rotate(1.2deg);
+}
+
+.home-editorial .pp-hero-frame-3 {
+  left: 0;
+  bottom: 0;
+  width: 34%;
+  height: 34%;
+  transform: rotate(-2deg);
+}
+
+@media (max-width: 1023px) {
+  .home-editorial .pp-nav {
+    grid-template-columns: 1fr auto;
+  }
+
+  .home-editorial .pp-hero-frame-1 {
+    inset: 0 22% 8% 8%;
+  }
+
+  .home-editorial .pp-hero-frame-2 {
+    width: 38%;
+  }
+}
+```
+
+- [ ] **Step 6: Switch HomePage to the new hero**
+
+Change only the hero call at this stage:
 
 ```tsx
 <Hero content={homeEditorialContent.hero} />
 ```
 
-- [ ] **Step 6: Run focused and full tests**
+- [ ] **Step 7: Verify GREEN**
 
 ```powershell
 npm test -- src/components/home/hero.test.tsx src/components/home/navbar.test.tsx src/components/home/home-page.test.tsx
-npm test
 ```
 
-Expected: PASS after replacing stale homepage tests that still depend on hero category cards.
+Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```powershell
-git add src/app/globals.css src/components/home/Navbar.tsx src/components/home/Hero.tsx src/components/home/HomePage.tsx src/components/home/hero.test.tsx src/components/home/navbar.test.tsx src/components/home/home-page.test.tsx
+git add src/app/globals.css src/components/home/Navbar.tsx src/components/home/Hero.tsx src/components/home/HomePage.tsx src/components/home/hero.test.tsx src/components/home/navbar.test.tsx
 git commit -m "feat: build minimal full-viewport homepage hero"
 ```
 
 ---
 
-### Task 4: Gradual hero transition and three-service commercial section
+### Task 4: Replace pricing tabs with services and image-led proof
 
 **Files:**
 - Modify: `src/components/home/Services.tsx`
 - Modify: `src/components/home/services.test.tsx`
+- Create: `src/components/home/SelectedWork.tsx`
+- Create: `src/components/home/BeforeAfterFeature.tsx`
+- Create: `src/components/home/editorial-sections.test.tsx`
 - Modify: `src/components/home/HomePage.tsx`
 - Modify: `src/app/globals.css`
 
 **Interfaces:**
 - `Services` consumes `homeEditorialContent.services`.
-- Each service item exposes `title`, `startingPrice`, `audience`, `href`, and `image`.
+- `SelectedWork` consumes `homeEditorialContent.selectedWork`.
+- `BeforeAfterFeature` consumes `homeEditorialContent.beforeAfter` and reuses `BeforeAfterSlider` unchanged.
 
-- [ ] **Step 1: Write failing service-card test**
+- [ ] **Step 1: Write failing service/proof tests**
 
-Replace tab-specific assertions in `services.test.tsx` with:
+Set `services.test.tsx` to assert three deep links, all three starting prices, and no tablist. Use `getAllByText("от €30")` for the two matching €30 prices.
+
+Create `editorial-sections.test.tsx`:
 
 ```tsx
 import { render, screen } from "@testing-library/react";
-import { Services } from "@/components/home/Services";
+import { BeforeAfterFeature } from "@/components/home/BeforeAfterFeature";
+import { SelectedWork } from "@/components/home/SelectedWork";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
-describe("Services", () => {
-  it("shows three equal services with starting prices and deep links", () => {
-    render(<Services services={homeEditorialContent.services} />);
+describe("homepage proof", () => {
+  it("shows curated local selected work", () => {
+    render(<SelectedWork items={homeEditorialContent.selectedWork} />);
+    expect(screen.getByText("AUTOMOTIVE · BMW M SERIES")).toBeInTheDocument();
+    expect(screen.getByText("REAL ESTATE · SOFIA")).toBeInTheDocument();
+    expect(screen.queryByText("Luxury Timepiece")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Разгледай цялото портфолио →" })).toHaveAttribute(
+      "href",
+      "/portfolio",
+    );
+  });
 
-    expect(screen.getByRole("link", { name: /Недвижими имоти/i })).toHaveAttribute(
-      "href",
-      "/services/real-estate",
-    );
-    expect(screen.getByRole("link", { name: /Автомобили/i })).toHaveAttribute(
-      "href",
-      "/services/automotive",
-    );
-    expect(screen.getByRole("link", { name: /Продукти/i })).toHaveAttribute(
-      "href",
-      "/services/products",
-    );
-
-    expect(screen.getByText("от €30")).toBeInTheDocument();
-    expect(screen.getByText("от €20")).toBeInTheDocument();
-    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+  it("keeps before-after as a keyboard-accessible slider", () => {
+    render(<BeforeAfterFeature content={homeEditorialContent.beforeAfter} />);
+    expect(screen.getByRole("slider", { name: "Плъзгач преди и след" })).toBeInTheDocument();
+    expect(screen.getByText("Снимането е половината работа.")).toBeInTheDocument();
   });
 });
 ```
 
-Use `getAllByText("от €30")` if the two €30 prices make the singular query ambiguous.
-
-- [ ] **Step 2: Run the focused test and verify RED**
+- [ ] **Step 2: Verify RED**
 
 ```powershell
-npm test -- src/components/home/services.test.tsx
+npm test -- src/components/home/services.test.tsx src/components/home/editorial-sections.test.tsx
 ```
 
-Expected: FAIL because current Services uses tabs and package cards.
+Expected: FAIL.
 
-- [ ] **Step 3: Rewrite Services as static editorial cards**
-
-Use a section with a CSS tonal bridge that begins dark and warms gradually before the actual ivory card area. Do not make the first pixel below hero pure white.
-
-Core structure:
+- [ ] **Step 3: Rewrite `Services.tsx`**
 
 ```tsx
 import Image from "next/image";
@@ -665,6 +852,7 @@ export function Services({ services }: { services: readonly Service[] }) {
   return (
     <section id="services" className="pp-services-transition scroll-mt-24">
       <div className="mx-auto max-w-[92rem] px-4 pb-24 pt-36 sm:px-8 lg:px-10 xl:px-16">
+        <h2 className="pp-display mb-10 text-5xl text-[var(--pp-text-dark)] sm:text-6xl">Услуги</h2>
         <div className="grid gap-5 lg:grid-cols-3">
           {services.map((service) => (
             <a key={service.category} href={service.href} className="pp-service-card group">
@@ -679,11 +867,13 @@ export function Services({ services }: { services: readonly Service[] }) {
               </div>
               <div className="p-6 sm:p-8">
                 <div className="flex items-baseline justify-between gap-4">
-                  <h2 className="pp-display text-3xl text-[var(--pp-text-dark)]">{service.title}</h2>
-                  <p className="text-sm font-medium text-[var(--pp-text-dark)]">{service.startingPrice}</p>
+                  <h3 className="pp-display text-3xl text-[var(--pp-text-dark)]">{service.title}</h3>
+                  <p className="text-sm font-semibold text-[var(--pp-text-dark)]">{service.startingPrice}</p>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-black/65">{service.audience}</p>
-                <span className="mt-7 inline-flex text-sm font-medium">Виж пакетите →</span>
+                <span className="mt-7 inline-flex text-sm font-semibold text-[var(--pp-text-dark)]">
+                  Виж пакетите →
+                </span>
               </div>
             </a>
           ))}
@@ -694,127 +884,68 @@ export function Services({ services }: { services: readonly Service[] }) {
 }
 ```
 
-Add a scoped transition rule:
-
-```css
-.home-editorial .pp-services-transition {
-  background: linear-gradient(
-    180deg,
-    var(--pp-ink) 0,
-    #25231f 10rem,
-    #655f54 22rem,
-    var(--pp-ivory) 34rem,
-    var(--pp-ivory) 100%
-  );
-}
-```
-
-- [ ] **Step 4: Place Services immediately after Hero**
-
-In `HomePage.tsx`:
+- [ ] **Step 4: Create `SelectedWork.tsx`**
 
 ```tsx
-<Hero content={homeEditorialContent.hero} />
-<Services services={homeEditorialContent.services} />
-```
-
-- [ ] **Step 5: Run tests**
-
-```powershell
-npm test -- src/components/home/services.test.tsx src/components/home/home-page.test.tsx
-npm test
-```
-
-Expected: PASS after stale hero-to-tab tests are removed from `home-page.test.tsx`.
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add src/app/globals.css src/components/home/Services.tsx src/components/home/services.test.tsx src/components/home/HomePage.tsx src/components/home/home-page.test.tsx
-git commit -m "feat: add editorial service pricing section"
-```
-
----
-
-### Task 5: Selected work and before/after proof
-
-**Files:**
-- Create: `src/components/home/SelectedWork.tsx`
-- Create: `src/components/home/BeforeAfterFeature.tsx`
-- Create/Modify: `src/components/home/editorial-sections.test.tsx`
-- Modify: `src/components/home/HomePage.tsx`
-
-**Interfaces:**
-- `SelectedWork` consumes `homeEditorialContent.selectedWork`.
-- `BeforeAfterFeature` consumes `homeEditorialContent.beforeAfter`.
-- Reuses `BeforeAfterSlider` unchanged.
-
-- [ ] **Step 1: Write failing proof-section tests**
-
-Create `editorial-sections.test.tsx`:
-
-```tsx
-import { render, screen } from "@testing-library/react";
-import { SelectedWork } from "@/components/home/SelectedWork";
-import { BeforeAfterFeature } from "@/components/home/BeforeAfterFeature";
+import Image from "next/image";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
-describe("editorial proof sections", () => {
-  it("renders only the curated owner-approved selected work", () => {
-    render(<SelectedWork items={homeEditorialContent.selectedWork} />);
-    expect(screen.getByText("AUTOMOTIVE · BMW M SERIES")).toBeInTheDocument();
-    expect(screen.getByText("REAL ESTATE · SOFIA")).toBeInTheDocument();
-    expect(screen.queryByText("Luxury Timepiece")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Разгледай цялото портфолио/i })).toHaveAttribute(
-      "href",
-      "/portfolio",
-    );
-  });
+type WorkItem = (typeof homeEditorialContent.selectedWork)[number];
 
-  it("keeps the existing before-after slider keyboard-accessible", () => {
-    render(<BeforeAfterFeature content={homeEditorialContent.beforeAfter} />);
-    expect(screen.getByRole("slider", { name: "Плъзгач преди и след" })).toBeInTheDocument();
-    expect(screen.getByText("Снимането е половината работа.")).toBeInTheDocument();
-  });
-});
-```
-
-- [ ] **Step 2: Run test and verify RED**
-
-```powershell
-npm test -- src/components/home/editorial-sections.test.tsx
-```
-
-Expected: FAIL because the new components do not exist.
-
-- [ ] **Step 3: Build SelectedWork**
-
-Use one dominant wide image, one tall image, and two supporting images. Avoid equal card geometry.
-
-Core data mapping:
-
-```tsx
 const layout = {
   wide: "md:col-span-8 aspect-[16/9]",
   tall: "md:col-span-4 md:row-span-2 aspect-[3/4]",
   square: "md:col-span-4 aspect-square",
 } as const;
+
+export function SelectedWork({ items }: { items: readonly WorkItem[] }) {
+  return (
+    <section id="portfolio" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto max-w-[92rem]">
+        <div className="mb-10 flex items-end justify-between gap-6">
+          <h2 className="pp-display text-5xl sm:text-7xl">Избрана работа.</h2>
+          <a href="/portfolio" className="hidden text-sm font-semibold sm:inline-flex">
+            Разгледай цялото портфолио →
+          </a>
+        </div>
+        <div className="grid auto-rows-auto gap-4 md:grid-cols-12">
+          {items.map((item) => (
+            <a key={item.id} href={item.href} className={`group relative overflow-hidden ${layout[item.ratio]}`}>
+              <Image
+                src={item.image}
+                alt={item.alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 66vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.015]"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16">
+                <p className="text-xs font-semibold tracking-[0.08em] text-white">{item.label}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+        <a href="/portfolio" className="mt-7 inline-flex text-sm font-semibold sm:hidden">
+          Разгледай цялото портфолио →
+        </a>
+      </div>
+    </section>
+  );
+}
 ```
 
-Each item is an `<a>` with a large `Image`, minimal label, and no heavy card border.
-
-- [ ] **Step 4: Build BeforeAfterFeature**
-
-Structure:
+- [ ] **Step 5: Create `BeforeAfterFeature.tsx`**
 
 ```tsx
 import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
+import { homeEditorialContent } from "@/data/home-editorial-content";
 
-export function BeforeAfterFeature({ content }: { content: ... }) {
+type BeforeAfterContent = typeof homeEditorialContent.beforeAfter;
+
+export function BeforeAfterFeature({ content }: { content: BeforeAfterContent }) {
   return (
-    <section className="bg-[var(--pp-soft-black)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
+    <section id="before-after" className="bg-[var(--pp-soft-black)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
       <div className="mx-auto max-w-[92rem]">
-        <h2 className="pp-display text-5xl text-[var(--pp-warm-white)] sm:text-6xl">
+        <h2 className="pp-display text-5xl text-[var(--pp-warm-white)] sm:text-7xl">
           Снимането е половината работа.
         </h2>
         <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--pp-muted)]">
@@ -834,38 +965,53 @@ export function BeforeAfterFeature({ content }: { content: ... }) {
 }
 ```
 
-- [ ] **Step 5: Add both sections to HomePage**
+- [ ] **Step 6: Add gradual transition and service-card CSS**
 
-Order:
+```css
+.home-editorial .pp-services-transition {
+  background: linear-gradient(
+    180deg,
+    var(--pp-ink) 0,
+    #25231f 10rem,
+    #655f54 22rem,
+    var(--pp-ivory) 34rem,
+    var(--pp-ivory) 100%
+  );
+}
+
+.home-editorial .pp-service-card {
+  overflow: hidden;
+  border: 1px solid var(--pp-line-light);
+  border-radius: 0.5rem;
+  background: var(--pp-paper);
+  color: var(--pp-text-dark);
+}
+```
+
+- [ ] **Step 7: Place the three sections in HomePage**
+
+Immediately after Hero:
 
 ```tsx
-<Services ... />
+<Services services={homeEditorialContent.services} />
 <SelectedWork items={homeEditorialContent.selectedWork} />
-<WhyChooseMe ... />
 <BeforeAfterFeature content={homeEditorialContent.beforeAfter} />
 ```
 
-`WhyChooseMe` may remain absent until Task 6; during this task place `SelectedWork` followed directly by `BeforeAfterFeature`, then insert Task 6 sections in the final order.
+Remove old `Services` props, old `Portfolio`, and the old before/after presentation from the rendered homepage. Do not delete their files.
 
-- [ ] **Step 6: Run tests**
+- [ ] **Step 8: Verify GREEN and commit**
 
 ```powershell
-npm test -- src/components/home/editorial-sections.test.tsx
+npm test -- src/components/home/services.test.tsx src/components/home/editorial-sections.test.tsx
 npm test
-```
-
-Expected: PASS.
-
-- [ ] **Step 7: Commit**
-
-```powershell
-git add src/components/home/SelectedWork.tsx src/components/home/BeforeAfterFeature.tsx src/components/home/editorial-sections.test.tsx src/components/home/HomePage.tsx
-git commit -m "feat: add editorial portfolio proof sections"
+git add src/app/globals.css src/components/home/Services.tsx src/components/home/services.test.tsx src/components/home/SelectedWork.tsx src/components/home/BeforeAfterFeature.tsx src/components/home/editorial-sections.test.tsx src/components/home/HomePage.tsx
+git commit -m "feat: add editorial services and portfolio proof"
 ```
 
 ---
 
-### Task 6: Condensed trust, videography, and three-step process
+### Task 5: Add condensed trust, videography, and process sections
 
 **Files:**
 - Create: `src/components/home/WhyChooseMe.tsx`
@@ -879,22 +1025,22 @@ git commit -m "feat: add editorial portfolio proof sections"
 - `VideoFeature` consumes `homeEditorialContent.video`.
 - `HowItWorks` consumes `homeEditorialContent.process`.
 
-- [ ] **Step 1: Extend the failing section tests**
+- [ ] **Step 1: Extend tests and verify RED**
 
-Add:
+Add imports for the three new components and these assertions to `editorial-sections.test.tsx`:
 
 ```tsx
 it("condenses trust into four proof points", () => {
   render(<WhyChooseMe content={homeEditorialContent.why} />);
   expect(screen.getByText("Ясна цена предварително")).toBeInTheDocument();
   expect(screen.getByText("Директна комуникация с фотографа")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: /Повече за мен/i })).toHaveAttribute("href", "/about");
+  expect(screen.getByRole("link", { name: "Повече за мен →" })).toHaveAttribute("href", "/about");
 });
 
 it("presents videography as one concise feature", () => {
   render(<VideoFeature content={homeEditorialContent.video} />);
   expect(screen.getByText("от €50 / видео")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: /Виж видеография/i })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Виж видеография →" })).toHaveAttribute(
     "href",
     "/services/videography",
   );
@@ -909,59 +1055,125 @@ it("renders the three-step process", () => {
 });
 ```
 
-- [ ] **Step 2: Run focused tests and verify RED**
+Run:
 
 ```powershell
 npm test -- src/components/home/editorial-sections.test.tsx
 ```
 
-Expected: FAIL for missing components.
+Expected: FAIL because the components do not exist.
 
-- [ ] **Step 3: Implement WhyChooseMe**
-
-Use an ivory surface, large editorial heading, four numbered/simple proof points, and a small identity block. No statistics cards.
-
-- [ ] **Step 4: Implement VideoFeature**
-
-Use `/portfolio/videography-hero.jpg` as one large image/visual with concise copy and one deep-link CTA. Do not render tabs or four feature cards.
-
-- [ ] **Step 5: Implement HowItWorks**
-
-Use three columns on desktop and a vertical sequence on mobile. No icons are required; the large `01 / 02 / 03` numbers provide hierarchy.
-
-- [ ] **Step 6: Insert sections in final narrative order**
-
-Update `HomePage.tsx` to:
+- [ ] **Step 2: Create `WhyChooseMe.tsx`**
 
 ```tsx
-<Hero ... />
-<Services ... />
-<SelectedWork ... />
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+type WhyContent = typeof homeEditorialContent.why;
+
+export function WhyChooseMe({ content }: { content: WhyContent }) {
+  return (
+    <section id="about" className="bg-[var(--pp-ivory)] px-4 py-24 text-[var(--pp-text-dark)] sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto grid max-w-[92rem] gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+        <div>
+          <h2 className="pp-display max-w-4xl text-5xl leading-[0.95] sm:text-7xl">{content.title}</h2>
+          <div className="mt-10 border-t border-[var(--pp-line-light)] pt-6">
+            <p className="font-semibold">{content.name}</p>
+            <p className="mt-1 text-sm text-black/60">{content.role}</p>
+            <a href={content.href} className="mt-6 inline-flex text-sm font-semibold">Повече за мен →</a>
+          </div>
+        </div>
+        <ol className="grid gap-0 border-t border-[var(--pp-line-light)]">
+          {content.points.map((point, index) => (
+            <li key={point} className="grid grid-cols-[3rem_1fr] gap-4 border-b border-[var(--pp-line-light)] py-6">
+              <span className="text-xs font-semibold">0{index + 1}</span>
+              <span className="text-lg">{point}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+```
+
+- [ ] **Step 3: Create `VideoFeature.tsx`**
+
+```tsx
+import Image from "next/image";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+type VideoContent = typeof homeEditorialContent.video;
+
+export function VideoFeature({ content }: { content: VideoContent }) {
+  return (
+    <section id="videography" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto grid max-w-[92rem] gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-[0.5rem]">
+          <Image src={content.image.src} alt={content.image.alt} fill sizes="(max-width: 1024px) 100vw, 62vw" className="object-cover" />
+        </div>
+        <div className="pb-2">
+          <h2 className="pp-display text-5xl sm:text-7xl">{content.title}</h2>
+          <p className="mt-4 text-lg text-[var(--pp-brass)]">{content.price}</p>
+          <p className="mt-5 max-w-md text-base leading-7 text-[var(--pp-muted)]">{content.description}</p>
+          <a href={content.href} className="mt-8 inline-flex text-sm font-semibold">Виж видеография →</a>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+- [ ] **Step 4: Create `HowItWorks.tsx`**
+
+```tsx
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+type Step = (typeof homeEditorialContent.process)[number];
+
+export function HowItWorks({ steps }: { steps: readonly Step[] }) {
+  return (
+    <section id="process" className="bg-[var(--pp-ivory)] px-4 py-24 text-[var(--pp-text-dark)] sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto max-w-[92rem]">
+        <h2 className="pp-display text-5xl sm:text-7xl">Как работим.</h2>
+        <div className="mt-12 grid border-t border-[var(--pp-line-light)] lg:grid-cols-3">
+          {steps.map((step) => (
+            <article key={step.number} className="border-b border-[var(--pp-line-light)] py-8 lg:border-r lg:px-7 lg:first:pl-0 lg:last:border-r-0">
+              <p className="text-xs font-semibold">{step.number}</p>
+              <h3 className="pp-display mt-8 text-3xl">{step.title}</h3>
+              <p className="mt-4 max-w-sm text-sm leading-6 text-black/65">{step.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+- [ ] **Step 5: Insert the sections in final order around BeforeAfter**
+
+The relevant HomePage sequence becomes:
+
+```tsx
+<SelectedWork items={homeEditorialContent.selectedWork} />
 <WhyChooseMe content={homeEditorialContent.why} />
-<BeforeAfterFeature ... />
+<BeforeAfterFeature content={homeEditorialContent.beforeAfter} />
 <VideoFeature content={homeEditorialContent.video} />
 <HowItWorks steps={homeEditorialContent.process} />
 ```
 
-- [ ] **Step 7: Run tests**
+- [ ] **Step 6: Verify GREEN and commit**
 
 ```powershell
-npm test -- src/components/home/editorial-sections.test.tsx src/components/home/home-page.test.tsx
+npm test -- src/components/home/editorial-sections.test.tsx
 npm test
-```
-
-Expected: PASS.
-
-- [ ] **Step 8: Commit**
-
-```powershell
 git add src/components/home/WhyChooseMe.tsx src/components/home/VideoFeature.tsx src/components/home/HowItWorks.tsx src/components/home/editorial-sections.test.tsx src/components/home/HomePage.tsx
 git commit -m "feat: add trust video and process sections"
 ```
 
 ---
 
-### Task 7: Static reviews, short FAQ, and simplified booking section
+### Task 6: Replace carousel trust and card-heavy contact with simpler conversion sections
 
 **Files:**
 - Modify: `src/components/home/Reviews.tsx`
@@ -971,135 +1183,235 @@ git commit -m "feat: add trust video and process sections"
 - Modify: `src/components/home/Contact.tsx`
 - Modify: `src/components/home/contact.test.tsx`
 - Modify: `src/components/home/HomePage.tsx`
+- Modify: `src/app/globals.css`
 
 **Interfaces:**
-- `Reviews` consumes `homeEditorialContent.reviews`.
-- `Faq` consumes `homeEditorialContent.faq`.
-- `Contact` consumes `homeEditorialContent.contact` and preserves `submitContactForm()` / `validateContactForm()`.
+- `Reviews` consumes a readonly array of existing `ReviewItem` values.
+- `Faq` consumes a readonly array of existing `FaqItem` values.
+- `Contact` continues consuming existing `ContactContent` and preserves `validateContactForm()` / `submitContactForm()`.
 
-- [ ] **Step 1: Write failing review/FAQ/booking expectations**
+- [ ] **Step 1: Write failing tests**
 
-Reviews test:
+Update `reviews.test.tsx`:
 
 ```tsx
-it("renders all three testimonials without carousel interaction", () => {
+import { render, screen } from "@testing-library/react";
+import { Reviews } from "@/components/home/Reviews";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+test("renders all three reviews without carousel controls", () => {
   render(<Reviews content={homeEditorialContent.reviews} />);
   expect(screen.getAllByRole("article")).toHaveLength(3);
   expect(screen.queryByRole("button", { name: /Следващ отзив/i })).not.toBeInTheDocument();
 });
 ```
 
-FAQ test:
+Update `faq.test.tsx` so it renders `<Faq items={homeEditorialContent.faq} />`, asserts exactly five question buttons, clicks `Включена ли е обработката в цената?`, and verifies the answer appears.
 
-```tsx
-it("renders exactly the five booking-blocking questions", () => {
-  render(<Faq items={homeEditorialContent.faq} />);
-  expect(screen.getAllByRole("button")).toHaveLength(5);
-  expect(screen.getByRole("button", { name: "Кога ще получа снимките?" })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Кога се заплаща услугата?" })).toBeInTheDocument();
-});
-```
-
-Contact test should retain existing validation and successful submission cases and add:
+Retain existing contact validation/submission tests and add:
 
 ```tsx
 expect(screen.getByRole("heading", { name: "Нека заснемем следващия ви проект." })).toBeInTheDocument();
 expect(screen.getByText("Имоти · Автомобили · Продукти · Видео")).toBeInTheDocument();
 ```
 
-- [ ] **Step 2: Run focused tests and verify RED**
+- [ ] **Step 2: Verify RED**
 
 ```powershell
 npm test -- src/components/home/reviews.test.tsx src/components/home/faq.test.tsx src/components/home/contact.test.tsx
 ```
 
-Expected: FAIL because current reviews are carousel-based and Contact uses the old card-heavy presentation.
+Expected: FAIL.
 
-- [ ] **Step 3: Rewrite Reviews as a static three-card editorial grid**
-
-Keep all three existing quotes. One may span more columns, but all three must exist in DOM and be visible without interaction.
-
-- [ ] **Step 4: Simplify FAQ**
-
-Keep the existing accessible accordion behavior, but pass only `homeEditorialContent.faq` and use clean light-surface separators instead of heavy cards.
-
-- [ ] **Step 5: Simplify Contact while preserving form logic**
-
-Keep the existing state machine and `handleSubmit()` implementation. Replace the left-side stack of six contact cards with a compact heading/category/phone block.
-
-Target outer structure:
+- [ ] **Step 3: Rewrite `Reviews.tsx`**
 
 ```tsx
-<section id="contact" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
-  <div className="mx-auto grid max-w-[92rem] gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-    <div>
-      <h2 className="pp-display text-5xl sm:text-7xl">Нека заснемем следващия ви проект.</h2>
-      <p className="mt-6 text-sm uppercase tracking-[0.12em] text-[var(--pp-muted)]">
-        Имоти · Автомобили · Продукти · Видео
-      </p>
-      <a className="mt-8 inline-flex text-lg" href={`tel:${content.phone}`}>
-        0889 755 406
-      </a>
-    </div>
-    <form onSubmit={handleSubmit} noValidate>...</form>
-  </div>
-</section>
+import type { ReviewItem } from "@/lib/content-types";
+
+export function Reviews({ content }: { content: readonly ReviewItem[] }) {
+  return (
+    <section id="reviews" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto max-w-[92rem]">
+        <h2 className="pp-display text-5xl sm:text-7xl">Отзиви.</h2>
+        <div className="mt-12 grid gap-4 lg:grid-cols-3">
+          {content.map((review, index) => (
+            <article
+              key={`${review.author}-${review.role}`}
+              className={index === 0 ? "border-t border-[var(--pp-line-dark)] pt-7 lg:col-span-1" : "border-t border-[var(--pp-line-dark)] pt-7"}
+            >
+              <blockquote className="pp-display text-2xl leading-[1.15] text-[var(--pp-warm-white)]">“{review.quote}”</blockquote>
+              <p className="mt-7 text-sm font-semibold">{review.author}</p>
+              <p className="mt-1 text-xs text-[var(--pp-muted)]">{review.role}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 ```
 
-Retain labels `Име`, `Телефон`, `Тип заснемане`, `Съобщение`, submit text `Изпрати запитване`, validation messages, success message, and rate-limit error handling.
-
-- [ ] **Step 6: Add Reviews, FAQ, and Contact to HomePage**
-
-Final tail order:
+- [ ] **Step 4: Rewrite `Faq.tsx` as a light five-item accordion**
 
 ```tsx
-<HowItWorks ... />
+"use client";
+
+import { useState } from "react";
+import { Plus, X } from "lucide-react";
+import type { FaqItem } from "@/lib/content-types";
+
+export function Faq({ items }: { items: readonly FaqItem[] }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <section id="faq" className="bg-[var(--pp-ivory)] px-4 py-24 text-[var(--pp-text-dark)] sm:px-8 lg:px-10 xl:px-16">
+      <div className="mx-auto max-w-[92rem]">
+        <h2 className="pp-display text-5xl sm:text-7xl">Въпроси.</h2>
+        <div className="mt-10 border-t border-[var(--pp-line-light)]">
+          {items.map((item, index) => {
+            const isOpen = openIndex === index;
+            return (
+              <article key={item.question} className="border-b border-[var(--pp-line-light)]">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-6 py-6 text-left"
+                  aria-expanded={isOpen}
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
+                >
+                  <span className="text-base font-medium sm:text-lg">{item.question}</span>
+                  {isOpen ? <X className="h-4 w-4 shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
+                </button>
+                {isOpen ? <p className="max-w-3xl pb-6 text-sm leading-7 text-black/65">{item.answer}</p> : null}
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+- [ ] **Step 5: Preserve the existing Contact state/submission functions exactly and replace only its returned JSX**
+
+Keep `initialValues`, state hooks, `canSubmit`, `updateField()`, and `handleSubmit()` unchanged. Replace the current `return` with:
+
+```tsx
+return (
+  <section id="contact" className="bg-[var(--pp-ink)] px-4 py-24 sm:px-8 lg:px-10 xl:px-16">
+    <div className="mx-auto grid max-w-[92rem] gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+      <div>
+        <h2 className="pp-display max-w-xl text-5xl leading-[0.95] sm:text-7xl">
+          Нека заснемем следващия ви проект.
+        </h2>
+        <p className="mt-6 text-sm text-[var(--pp-muted)]">Имоти · Автомобили · Продукти · Видео</p>
+        <a href={`tel:${content.phone}`} className="mt-8 inline-flex text-lg font-semibold">0889 755 406</a>
+      </div>
+
+      <form className="grid gap-5" onSubmit={handleSubmit} noValidate>
+        <label className="grid gap-2 text-sm">
+          Име
+          <input className="pp-form-input" value={values.name} onChange={(event) => updateField("name", event.target.value)} />
+          {errors.name ? <span className="form-error">{errors.name}</span> : null}
+        </label>
+        <label className="grid gap-2 text-sm">
+          Телефон
+          <input className="pp-form-input" value={values.phone} onChange={(event) => updateField("phone", event.target.value)} />
+          {errors.phone ? <span className="form-error">{errors.phone}</span> : null}
+        </label>
+        <label className="grid gap-2 text-sm">
+          Тип заснемане
+          <select className="pp-form-input" value={values.service} onChange={(event) => updateField("service", event.target.value)}>
+            <option value="">Изберете услуга</option>
+            {content.serviceOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+          {errors.service ? <span className="form-error">{errors.service}</span> : null}
+        </label>
+        <label className="grid gap-2 text-sm">
+          Съобщение
+          <textarea className="pp-form-input min-h-36 resize-y" value={values.message} onChange={(event) => updateField("message", event.target.value)} />
+          {errors.message ? <span className="form-error">{errors.message}</span> : null}
+        </label>
+        <button type="submit" className="pp-button-primary mt-2 w-full" disabled={!canSubmit || isSubmitting}>
+          Изпрати запитване
+        </button>
+        {statusMessage ? (
+          <p role="status" aria-live="polite" className={statusMessage.tone === "success" ? "text-sm text-[var(--pp-warm-white)]" : "text-sm text-[#ffb9a9]"}>
+            {statusMessage.text}
+          </p>
+        ) : null}
+      </form>
+    </div>
+  </section>
+);
+```
+
+Remove `IconToken`, `Reveal`, and `SectionShell` imports from `Contact.tsx` after replacing the JSX.
+
+- [ ] **Step 6: Add homepage form CSS**
+
+```css
+.home-editorial .pp-form-input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--pp-line-dark);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.8rem 0;
+  color: var(--pp-warm-white);
+}
+
+.home-editorial .pp-form-input:focus {
+  border-bottom-color: var(--pp-brass);
+}
+
+.home-editorial .pp-form-input option {
+  color: #111;
+}
+```
+
+- [ ] **Step 7: Insert final trust/FAQ/contact tail in HomePage**
+
+After `HowItWorks`:
+
+```tsx
 <Reviews content={homeEditorialContent.reviews} />
 <Faq items={homeEditorialContent.faq} />
 <Contact content={homeEditorialContent.contact} />
 ```
 
-Do not render the old `FooterCta` after Contact.
+Remove old `FooterCta` and `FloatingCallButton` from the rendered homepage. Do not delete their files.
 
-- [ ] **Step 7: Run focused and full tests**
+- [ ] **Step 8: Verify GREEN and commit**
 
 ```powershell
 npm test -- src/components/home/reviews.test.tsx src/components/home/faq.test.tsx src/components/home/contact.test.tsx
 npm test
-```
-
-Expected: PASS.
-
-- [ ] **Step 8: Commit**
-
-```powershell
-git add src/components/home/Reviews.tsx src/components/home/reviews.test.tsx src/components/home/Faq.tsx src/components/home/faq.test.tsx src/components/home/Contact.tsx src/components/home/contact.test.tsx src/components/home/HomePage.tsx
+git add src/app/globals.css src/components/home/Reviews.tsx src/components/home/reviews.test.tsx src/components/home/Faq.tsx src/components/home/faq.test.tsx src/components/home/Contact.tsx src/components/home/contact.test.tsx src/components/home/HomePage.tsx
 git commit -m "feat: simplify homepage trust and booking flow"
 ```
 
 ---
 
-### Task 8: Final homepage orchestration and targeted legacy cleanup
+### Task 7: Final orchestration, unit gate, lint, and production build
 
 **Files:**
 - Modify: `src/components/home/HomePage.tsx`
 - Modify: `src/components/home/home-page.test.tsx`
-- Potentially delete only proven-unreferenced homepage files after search: `About.tsx`, `Terms.tsx`, `FooterCta.tsx`, `Videography.tsx`, old `Portfolio.tsx`
-- Potentially delete their obsolete tests only if the corresponding component is deleted and has no remaining consumer.
 
 **Interfaces:**
-- `HomePage` becomes the sole orchestration layer for Phase 1 sections.
+- `HomePage` is the sole Phase 1 orchestration layer.
 
-- [ ] **Step 1: Write final composition assertions**
+- [ ] **Step 1: Write the final section-order test**
 
-Update `home-page.test.tsx` to assert the required section order by DOM position:
+Add to `home-page.test.tsx`:
 
 ```tsx
 it("renders the approved conversion narrative in order", () => {
   const { container } = render(<HomePage />);
-  const ids = Array.from(container.querySelectorAll("main > section[id]")).map(
-    (node) => node.id,
-  );
+  const ids = Array.from(container.querySelectorAll("main > section[id]")).map((node) => node.id);
 
   expect(ids).toEqual([
     "hero",
@@ -1116,20 +1428,25 @@ it("renders the approved conversion narrative in order", () => {
 });
 ```
 
-Each new component must expose the matching id from this list.
-
-- [ ] **Step 2: Remove opening-view clutter from HomePage**
-
-Ensure `HomePage.tsx` no longer imports or renders:
-
-- `PointerGlow`
-- `FloatingCallButton`
-- `FooterCta`
-- old About/Terms/Videography/Portfolio sections
-
-The new homepage should be:
+- [ ] **Step 2: Make `HomePage.tsx` exactly the final Phase 1 orchestrator**
 
 ```tsx
+import { BeforeAfterFeature } from "@/components/home/BeforeAfterFeature";
+import { Contact } from "@/components/home/Contact";
+import { Faq } from "@/components/home/Faq";
+import { Hero } from "@/components/home/Hero";
+import { HomePage as HomePageTypeGuard } from "@/components/home/HomePage";
+import { HowItWorks } from "@/components/home/HowItWorks";
+import { Navbar } from "@/components/home/Navbar";
+import { Reviews } from "@/components/home/Reviews";
+import { SelectedWork } from "@/components/home/SelectedWork";
+import { Services } from "@/components/home/Services";
+import { VideoFeature } from "@/components/home/VideoFeature";
+import { WhyChooseMe } from "@/components/home/WhyChooseMe";
+import { homeEditorialContent } from "@/data/home-editorial-content";
+
+void HomePageTypeGuard;
+
 export function HomePage() {
   return (
     <div className="home-editorial">
@@ -1151,19 +1468,21 @@ export function HomePage() {
 }
 ```
 
-- [ ] **Step 3: Prove legacy homepage files are unreferenced before deleting anything**
+Before implementing this step, remove the two self-reference lines shown above (`import { HomePage as HomePageTypeGuard } ...` and `void HomePageTypeGuard;`). They are printed here only to make the invalid self-import explicit: the final file must contain no import from `@/components/home/HomePage`.
+
+The exact final imports are therefore the section imports plus `homeEditorialContent` only.
+
+- [ ] **Step 3: Verify no legacy homepage components remain in the final render**
 
 Run:
 
 ```powershell
-rg -n "components/home/(About|Terms|FooterCta|Videography|Portfolio)" src tests
+rg -n "PointerGlow|FloatingCallButton|FooterCta|<About|<Terms|<Videography|<Portfolio" src/components/home/HomePage.tsx
 ```
 
-Expected after orchestration changes: only the files' own tests/imports, if any.
+Expected: no matches.
 
-Delete a legacy file only when `rg` proves it has no production consumer. Do not delete shared UI components or brochure-page files.
-
-- [ ] **Step 4: Run unit suite, lint, and build**
+- [ ] **Step 4: Run the full local code gate**
 
 ```powershell
 npm test
@@ -1171,32 +1490,34 @@ npm run lint
 npm run build
 ```
 
-Expected: all three PASS.
+Expected: all PASS.
 
 - [ ] **Step 5: Commit**
 
 ```powershell
-git add -A
+git add src/components/home/HomePage.tsx src/components/home/home-page.test.tsx
 git commit -m "refactor: finalize editorial homepage composition"
 ```
 
 ---
 
-### Task 9: Responsive/SSR E2E verification and safe Vercel rollout
+### Task 8: Responsive, SSR, non-home isolation, and safe Vercel rollout
 
 **Files:**
 - Modify: `tests/e2e/home.spec.ts`
 - Modify: `tests/e2e/brochure-pages.spec.ts`
 
 **Interfaces:**
-- Produces: executable release gate for homepage behavior, SSR visibility, route isolation, and preview approval.
+- Produces the release gate for Phase 1 and the explicit owner-preview checkpoint.
 
-- [ ] **Step 1: Replace stale homepage E2E assertions**
+- [ ] **Step 1: Replace stale homepage E2E behavior with the new desktop flow**
 
-Rewrite the first test in `tests/e2e/home.spec.ts` around the new flow:
+In `tests/e2e/home.spec.ts`, replace the old desktop test with:
 
 ```ts
-test("desktop editorial homepage keeps the opening minimal and completes booking flow", async ({ page }) => {
+import { expect, test } from "@playwright/test";
+
+test("desktop editorial homepage stays minimal and completes booking flow", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.route("https://formspree.io/f/mnjoooke", async (route) => {
     await route.fulfill({
@@ -1244,19 +1565,19 @@ test("desktop editorial homepage keeps the opening minimal and completes booking
   await expect(page.getByText(/Запитването беше изпратено успешно/i)).toBeVisible();
 
   expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    ),
+    await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
   ).toBe(false);
 });
 ```
 
-Keep the existing 429 Formspree test.
+Keep the existing Formspree 429/retry test, adapting only selectors if the final Contact markup requires it.
 
-- [ ] **Step 2: Add mobile opening test**
+- [ ] **Step 2: Replace mobile/tablet tests with minimal-opening checks**
+
+Add:
 
 ```ts
-test("mobile opening remains dark, minimal, and uncluttered", async ({ page }) => {
+test("mobile opening remains dark, complete, and uncluttered", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
@@ -1273,17 +1594,23 @@ test("mobile opening remains dark, minimal, and uncluttered", async ({ page }) =
   await expect(page.locator('a[href="#contact"]').last()).toBeVisible();
 
   expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    ),
+    await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
+  ).toBe(false);
+});
+
+test("tablet homepage has no horizontal overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto("/");
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
   ).toBe(false);
 });
 ```
 
-- [ ] **Step 3: Add JavaScript-disabled SSR visibility test**
+- [ ] **Step 3: Add JavaScript-disabled SSR visibility proof**
 
 ```ts
-test("critical homepage content is visible without JavaScript", async ({ browser }) => {
+test("critical homepage content remains visible without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
     viewport: { width: 1280, height: 900 },
@@ -1301,9 +1628,9 @@ test("critical homepage content is visible without JavaScript", async ({ browser
 });
 ```
 
-- [ ] **Step 4: Add non-home Phase 1 isolation assertions**
+- [ ] **Step 4: Add explicit non-home isolation smoke test**
 
-In `tests/e2e/brochure-pages.spec.ts`, add:
+Append to `tests/e2e/brochure-pages.spec.ts`:
 
 ```ts
 test("phase 1 homepage scope does not leak onto brochure routes", async ({ page }) => {
@@ -1315,9 +1642,7 @@ test("phase 1 homepage scope does not leak onto brochure routes", async ({ page 
 });
 ```
 
-- [ ] **Step 5: Run complete local release gate**
-
-Run in order:
+- [ ] **Step 5: Run the complete release gate**
 
 ```powershell
 npm test
@@ -1328,7 +1653,7 @@ npm run test:e2e
 
 Expected: all PASS.
 
-- [ ] **Step 6: Perform manual responsive visual review before pushing**
+- [ ] **Step 6: Perform manual responsive review before pushing**
 
 Run:
 
@@ -1336,91 +1661,86 @@ Run:
 npm run dev
 ```
 
-Inspect at minimum:
+Inspect these exact viewport sizes:
 
-- 390×844 mobile
-- 768×1024 tablet
-- 1280×800 desktop
-- 1440×900 desktop
-- 1920×1080 large desktop
+- 390×844
+- 768×1024
+- 1280×800
+- 1440×900
+- 1920×1080
 
-Verify:
+Confirm all of the following:
 
-- first viewport contains no visible ivory strip;
-- H1 and both CTAs remain legible;
-- image spread crops intentionally;
-- no hero trust metadata exists;
-- dark-to-warm transition feels gradual rather than like a white cut;
-- service cards remain equal in weight;
-- selected work feels asymmetric/editorial;
+- no ivory/light strip is visible at first load;
+- hero contains no removed eyebrow, description, trust line, or service-card UI;
+- headline and both hero CTAs remain readable;
+- hero image crop looks intentional at every viewport;
+- transition from dark hero into the service section is gradual;
+- services have equal visual weight;
+- selected work is visibly asymmetric/editorial;
 - no horizontal overflow;
-- FAQ, slider, and mobile menu remain keyboard/touch usable.
+- FAQ, slider, and mobile menu remain usable;
+- non-home routes look like their pre-Phase-1 versions.
 
-- [ ] **Step 7: Push implementation branch and obtain Vercel Preview**
-
-Do not implement on `main`. At execution time create a dedicated implementation branch/worktree from the approved design branch, for example:
-
-```powershell
-git checkout -b feat/homepage-editorial-commerce
-
-git push -u origin feat/homepage-editorial-commerce
-```
-
-Expected: Vercel creates a Preview deployment from this branch.
-
-- [ ] **Step 8: Verify preview deployment**
-
-Use Vercel project `pavlov-photography` and confirm:
-
-- deployment state is `READY`;
-- source repository is `todevan/pavlov-photography`;
-- branch is `feat/homepage-editorial-commerce`;
-- build completes with Next.js 16.2.3;
-- preview homepage visibly matches the approved design direction;
-- `/about`, `/services`, `/services/automotive`, and `/portfolio` still render normally.
-
-- [ ] **Step 9: Owner visual approval gate**
-
-Show the owner the Vercel Preview. Do not merge to `main` until the owner explicitly approves the preview.
-
-- [ ] **Step 10: Merge/push to production only after approval**
-
-After explicit approval, merge the implementation branch into `main` without force-push, then verify the production deployment is `READY` and aliases include:
-
-- `pavlovphotography.eu`
-- `www.pavlovphotography.eu`
-
-Finally fetch the live homepage and verify the server HTML contains the H1 and service copy without hidden-by-default `opacity: 0` wrappers.
-
-- [ ] **Step 11: Commit final E2E gate changes before rollout**
+- [ ] **Step 7: Commit E2E release gates before remote push**
 
 ```powershell
 git add tests/e2e/home.spec.ts tests/e2e/brochure-pages.spec.ts
 git commit -m "test: gate editorial homepage rollout"
 ```
 
+- [ ] **Step 8: Push the implementation branch**
+
+```powershell
+git push -u origin feat/homepage-editorial-commerce
+```
+
+Expected: Vercel creates a Preview deployment for the branch.
+
+- [ ] **Step 9: Verify Vercel Preview**
+
+Confirm in project `pavlov-photography`:
+
+- deployment state `READY`;
+- source repository `todevan/pavlov-photography`;
+- source branch `feat/homepage-editorial-commerce`;
+- Next.js build succeeds;
+- preview homepage matches the approved Editorial Commerce direction;
+- `/about`, `/services`, `/services/automotive`, and `/portfolio` still render normally.
+
+- [ ] **Step 10: Owner visual approval gate**
+
+Provide the Vercel Preview to the owner. Stop here until the owner explicitly approves the preview.
+
+- [ ] **Step 11: Merge to production only after explicit approval**
+
+After approval, merge the implementation branch into `main` without force-push. Verify the resulting production deployment becomes `READY` and has both aliases:
+
+- `pavlovphotography.eu`
+- `www.pavlovphotography.eu`
+
+Fetch the live homepage after deployment and verify the server HTML contains `Снимки, които продават.` plus service copy without critical `opacity: 0` wrappers.
+
 ---
 
-## Final Acceptance Checklist
+## Self-Review Checklist for the Implementer
 
-- [ ] Site-wide design direction is documented; Phase 1 CSS is homepage-scoped.
-- [ ] Hero shows only navigation, headline, two CTAs, and photography.
-- [ ] No eyebrow line, supporting paragraph, trust metadata, emoji-like icons, or hero service cards.
-- [ ] Hero fills the initial viewport on mobile and desktop.
-- [ ] No light/ivory strip is visible at first load.
-- [ ] Dark-to-light transition is gradual and CSS-driven.
-- [ ] Three services are equally weighted and show starting prices immediately after the transition.
-- [ ] Product image is owner-approved and local.
-- [ ] Selected Work uses only owner-approved local images.
-- [ ] Before/after remains keyboard-accessible.
-- [ ] Videography is one concise feature, not a tab system.
-- [ ] Three reviews are visible without carousel interaction.
-- [ ] FAQ contains exactly five booking-blocking questions.
-- [ ] Contact form behavior and Formspree endpoint remain intact.
-- [ ] No floating call CTA clutters the opening mobile viewport.
+Before claiming completion, confirm:
+
+- [ ] The plan's Task 1 product-image truth gate is satisfied with owner-approved work.
+- [ ] The old OpenCode design direction is retired in `DESIGN.md`.
+- [ ] New global tokens are additive and homepage behavior is selected by `.home-editorial`.
+- [ ] The hero is server-rendered and contains only the approved minimal content.
+- [ ] No floating call CTA appears on the opening mobile viewport.
+- [ ] Services are static deep links, not tabs.
+- [ ] Selected Work contains only local owner-approved images.
+- [ ] Before/after keyboard behavior remains intact.
+- [ ] Why, video, and process sections match the approved narrative.
+- [ ] All three testimonials are visible without carousel interaction.
+- [ ] FAQ has exactly five booking-blocking questions.
+- [ ] Formspree behavior and error handling are unchanged.
+- [ ] `HomePage.tsx` renders section ids in the approved order.
 - [ ] Critical content is visible with JavaScript disabled.
-- [ ] No horizontal overflow at mobile/tablet/desktop checkpoints.
-- [ ] Unit tests, lint, build, and Playwright all pass.
-- [ ] Non-home brochure routes remain functional and outside `.home-editorial` scope.
-- [ ] Vercel Preview receives explicit visual approval before production merge.
-- [ ] Production domain returns the approved new homepage after merge.
+- [ ] Unit tests, lint, build, and Playwright pass.
+- [ ] Non-home routes do not contain `.home-editorial`.
+- [ ] Vercel Preview is approved by the owner before production merge.
