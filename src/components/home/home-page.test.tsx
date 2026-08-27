@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { HomePage } from "@/components/home/HomePage";
 
 describe("HomePage editorial integration", () => {
@@ -19,5 +19,25 @@ describe("HomePage editorial integration", () => {
     }
 
     expect(screen.queryByRole("button", { name: /Недвижими имоти/i })).not.toBeInTheDocument();
+  });
+
+  it("uses the static three-service editorial section instead of pricing tabs", () => {
+    render(<HomePage />);
+
+    const services = document.getElementById("services");
+    expect(services).not.toBeNull();
+    expect(within(services!).queryByRole("tablist")).not.toBeInTheDocument();
+    expect(within(services!).getByRole("link", { name: /Недвижими имоти/i })).toHaveAttribute(
+      "href",
+      "/services/real-estate",
+    );
+    expect(within(services!).getByRole("link", { name: /Автомобили/i })).toHaveAttribute(
+      "href",
+      "/services/automotive",
+    );
+    expect(within(services!).getByRole("link", { name: /Продукти/i })).toHaveAttribute(
+      "href",
+      "/services/products",
+    );
   });
 });
