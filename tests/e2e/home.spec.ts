@@ -12,6 +12,8 @@ test("desktop editorial homepage stays minimal and completes booking flow", asyn
 
   await page.goto("/");
 
+  await expect(page.getByRole("link", { name: "Pavlov Photography" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Отвори менюто" })).toBeHidden();
   await expect(page.getByRole("heading", { name: "Снимки, които продават." })).toBeVisible();
   await expect(page.locator("#hero")).not.toContainText("Commercial Photography");
   await expect(page.locator("#hero")).not.toContainText("24–48ч");
