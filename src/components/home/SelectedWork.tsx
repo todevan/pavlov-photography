@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
 type WorkItem = (typeof homeEditorialContent.selectedWork)[number];
@@ -17,14 +18,14 @@ export function SelectedWork({ items }: { items: readonly WorkItem[] }) {
       <div className="mx-auto max-w-[92rem]">
         <div className="mb-10 flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-end">
           <h2 className="pp-display text-5xl sm:text-7xl">Избрана работа.</h2>
-          <a href="/portfolio" className="inline-flex text-sm font-semibold">
+          <Link href="/portfolio" className="inline-flex text-sm font-semibold">
             Разгледай цялото портфолио →
-          </a>
+          </Link>
         </div>
 
         <div className="grid gap-4 md:grid-cols-12">
           {items.map((item) => (
-            <a
+            <Link
               key={item.id}
               href={item.href}
               className={`group relative overflow-hidden rounded-[0.45rem] ${layout[item.ratio]}`}
@@ -39,7 +40,7 @@ export function SelectedWork({ items }: { items: readonly WorkItem[] }) {
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16">
                 <p className="text-xs font-semibold tracking-[0.08em] text-white">{item.label}</p>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
