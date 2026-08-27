@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { BeforeAfterFeature } from "@/components/home/BeforeAfterFeature";
+import { HowItWorks } from "@/components/home/HowItWorks";
 import { SelectedWork } from "@/components/home/SelectedWork";
+import { VideoFeature } from "@/components/home/VideoFeature";
 import { WhyChooseMe } from "@/components/home/WhyChooseMe";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
@@ -32,5 +34,24 @@ describe("Editorial proof sections", () => {
 
     expect(screen.getByRole("slider", { name: "Плъзгач преди и след" })).toBeInTheDocument();
     expect(screen.getByText("Снимането е половината работа.")).toBeInTheDocument();
+  });
+
+  it("presents videography as one concise feature", () => {
+    render(<VideoFeature content={homeEditorialContent.video} />);
+
+    expect(screen.getByText("от €50 / видео")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Виж видеография →" })).toHaveAttribute(
+      "href",
+      "/services/videography",
+    );
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+  });
+
+  it("renders the three-step process", () => {
+    render(<HowItWorks steps={homeEditorialContent.process} />);
+
+    expect(screen.getByText("01")).toBeInTheDocument();
+    expect(screen.getByText("02")).toBeInTheDocument();
+    expect(screen.getByText("03")).toBeInTheDocument();
   });
 });
