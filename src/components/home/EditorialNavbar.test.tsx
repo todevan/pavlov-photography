@@ -6,10 +6,10 @@ import { EditorialNavbar } from "@/components/home/EditorialNavbar";
 import { homeEditorialContent } from "@/data/home-editorial-content";
 
 describe("EditorialNavbar", () => {
-  it("renders the minimal homepage navigation and booking action", () => {
+  it("renders the refined homepage wordmark, navigation, and booking action", () => {
     render(<EditorialNavbar links={homeEditorialContent.nav} />);
 
-    expect(screen.getByRole("link", { name: "PAVLOV PHOTOGRAPHY" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Pavlov Photography" })).toHaveAttribute(
       "href",
       "#hero",
     );
