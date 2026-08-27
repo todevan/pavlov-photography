@@ -40,12 +40,17 @@ describe("Portfolio", () => {
     expect(screen.getByRole("tablist").parentElement).toHaveClass(
       "soft-card",
       "flex",
-      "flex-wrap",
-      "items-center",
-      "gap-3",
+      "flex-col",
+      "items-stretch",
+      "gap-2.5",
+      "sm:flex-row",
+      "sm:flex-wrap",
+      "sm:items-center",
+      "sm:gap-4",
     );
     expect(screen.getByText("BMW M Series").closest("article")).toHaveClass(
-      "mb-4",
+      "mb-3",
+      "sm:mb-4",
       "block",
       "w-full",
       "break-inside-avoid",

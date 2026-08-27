@@ -70,20 +70,25 @@ describe("brochure page views", () => {
     expect(
       screen.queryByText(/От чисти listing кадри до по-изразени showcase серии/i),
     ).not.toBeInTheDocument();
-    expect(screen.getByText("Какво печелите").className).toContain("text-xl");
+    expect(screen.getByText("Какво печелите").className).toContain("text-[1rem]");
+    expect(screen.getByText("Какво печелите").className).toContain("sm:text-2xl");
     expect(screen.getByText("Какво печелите").className).toContain("text-center");
     expect(screen.getByText("Стъпки").className).toContain("justify-center");
 
     rerender(<ServiceDetailPageView content={productsPage!} />);
 
     expect(screen.queryByText(/Продукти с по-чисто и по-желано излъчване/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /Продукти с по-желано излъчване/i })).toBeInTheDocument();
-    expect(screen.getByText("Какво печелите").className).toContain("text-xl");
+    expect(
+      screen.getByRole("heading", { name: /Продукти с по-желано излъчване/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Какво печелите").className).toContain("text-[1rem]");
+    expect(screen.getByText("Какво печелите").className).toContain("sm:text-2xl");
     expect(screen.getByText("Какво печелите").className).toContain("text-center");
 
     rerender(<ServiceDetailPageView content={videographyPage!} />);
 
-    expect(screen.getByText("Какво печелите").className).toContain("text-xl");
+    expect(screen.getByText("Какво печелите").className).toContain("text-[1rem]");
+    expect(screen.getByText("Какво печелите").className).toContain("sm:text-2xl");
     expect(screen.getByText("Какво печелите").className).toContain("text-center");
   });
 });
