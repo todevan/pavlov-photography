@@ -1,26 +1,24 @@
 import { About } from "@/components/home/About";
 import { Contact } from "@/components/home/Contact";
+import { EditorialHero } from "@/components/home/EditorialHero";
+import { EditorialNavbar } from "@/components/home/EditorialNavbar";
 import { Faq } from "@/components/home/Faq";
 import { FooterCta } from "@/components/home/FooterCta";
-import { Hero } from "@/components/home/Hero";
-import { Navbar } from "@/components/home/Navbar";
 import { Portfolio } from "@/components/home/Portfolio";
 import { Reviews } from "@/components/home/Reviews";
 import { Services } from "@/components/home/Services";
 import { Terms } from "@/components/home/Terms";
 import { Videography } from "@/components/home/Videography";
 import { FloatingCallButton } from "@/components/ui/FloatingCallButton";
-import { PointerGlow } from "@/components/ui/PointerGlow";
 import { homeContent } from "@/data/home-content";
-import { homeNavLinks } from "@/lib/site-navigation";
+import { homeEditorialContent } from "@/data/home-editorial-content";
 
 export function HomePage() {
   return (
-    <>
-      <PointerGlow />
-      <Navbar links={homeNavLinks} />
-      <main className="relative overflow-hidden pb-24 md:pb-0">
-        <Hero content={homeContent.hero} />
+    <div className="home-editorial">
+      <EditorialNavbar links={homeEditorialContent.nav} />
+      <main className="relative overflow-x-clip pb-24 md:pb-0">
+        <EditorialHero content={homeEditorialContent.hero} />
         <About content={homeContent.about} />
         <Services content={homeContent.services} />
         <Videography content={homeContent.videography} />
@@ -32,6 +30,6 @@ export function HomePage() {
       </main>
       <FooterCta content={homeContent.footerCta} />
       <FloatingCallButton phone={homeContent.contact.phone} />
-    </>
+    </div>
   );
 }
