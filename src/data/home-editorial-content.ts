@@ -12,8 +12,8 @@ export const homeEditorialContent = {
     primaryCta: "Запази снимане",
     secondaryCta: "Виж услугите",
     images: [
-      { src: "/portfolio/urban-apartment.png", alt: "Модерен градски апартамент с големи прозорци" },
       { src: "/portfolio/bmw-m-series.png", alt: "Бяло BMW на планински завой през есента" },
+      { src: "/portfolio/urban-apartment.png", alt: "Модерен градски апартамент с големи прозорци" },
     ],
   },
   services: [
