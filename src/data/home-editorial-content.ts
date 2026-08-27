@@ -12,14 +12,8 @@ export const homeEditorialContent = {
     primaryCta: "Запази снимане",
     secondaryCta: "Виж услугите",
     images: [
-      {
-        src: "/portfolio/urban-apartment.png",
-        alt: "Модерен градски апартамент с големи прозорци",
-      },
-      {
-        src: "/portfolio/bmw-m-series.png",
-        alt: "Бяло BMW на планински завой през есента",
-      },
+      { src: "/portfolio/urban-apartment.png", alt: "Модерен градски апартамент с големи прозорци" },
+      { src: "/portfolio/bmw-m-series.png", alt: "Бяло BMW на планински завой през есента" },
     ],
   },
   services: [
@@ -29,10 +23,7 @@ export const homeEditorialContent = {
       startingPrice: "от €30",
       audience: "За брокери, агенции, Airbnb и частни обяви.",
       href: "/services/real-estate",
-      image: {
-        src: "/portfolio/urban-apartment.png",
-        alt: "Градски апартамент с естествена светлина",
-      },
+      image: { src: "/portfolio/urban-apartment.png", alt: "Градски апартамент с естествена светлина" },
     },
     {
       category: "automotive",
@@ -40,10 +31,7 @@ export const homeEditorialContent = {
       startingPrice: "от €20",
       audience: "За частни обяви, автокъщи и премиум listings.",
       href: "/services/automotive",
-      image: {
-        src: "/portfolio/bmw-m-series.png",
-        alt: "BMW M Series автомобилна фотография",
-      },
+      image: { src: "/portfolio/bmw-m-series.png", alt: "BMW M Series автомобилна фотография" },
     },
     {
       category: "products",
@@ -93,4 +81,19 @@ export const homeEditorialContent = {
     href: "/about",
   },
   beforeAfter: homeContent.portfolio.beforeAfter,
+  video: {
+    title: "Видеография",
+    price: "от €50 / видео",
+    description: "Кратки cinematic видеа за имоти, автомобили и продукти.",
+    href: "/services/videography",
+    image: { src: "/portfolio/videography-hero.jpg", alt: "Кинематично видео заснемане" },
+  },
+  process: [
+    { number: "01", title: "Запитване", text: "Казваш какво и кога трябва да снимаме." },
+    { number: "02", title: "Заснемане", text: "Идвам на локация и изпълняваме предварително уточнения план." },
+    { number: "03", title: "Готовите кадри", text: "Получаваш обработените файлове до 24–48 часа." },
+  ],
+  reviews: homeContent.reviews.featured,
+  faq: homeContent.faq.items.slice(0, 5),
+  contact: homeContent.contact,
 } as const;
