@@ -1,99 +1,60 @@
-# Pavlov Photography Homepage — Editorial Commerce Redesign
+# Pavlov Photography — Site-wide Editorial Commerce Visual System + Homepage Phase 1
 
 **Date:** 2026-08-27  
 **Status:** Design approved; implementation not started  
-**Scope:** Homepage only  
+**Design scope:** Site-wide visual system  
+**Phase 1 implementation scope:** Homepage only  
 **Branch:** `design/homepage-editorial-commerce`
 
 ## 1. Goal
 
-Redesign the Pavlov Photography homepage from a dark, component-heavy portfolio into a conversion-first commercial photography landing page that still feels premium and image-led.
+Create a coherent site-wide visual language for Pavlov Photography, then apply it first to the homepage.
 
-The homepage must make a new visitor understand, within the first 5–10 seconds:
+The redesign must move the site away from its current dark, component-heavy, SaaS-like presentation and toward a premium commercial-photography identity that is image-led, editorial, restrained, and conversion-focused.
 
-1. what Teodor Pavlov photographs;
-2. who the service is for;
-3. that pricing is clear;
-4. what the work looks like;
-5. how to book.
+Phase 1 changes only the homepage implementation. `/about`, `/services`, service-detail pages, portfolio pages, and other routes remain functionally unchanged in Phase 1, but the visual system is intentionally designed so those pages can later migrate to the same language without redesigning the system again.
 
-The three primary commercial categories are equal in importance:
+The three primary commercial categories remain equal in importance:
 
 - real estate;
 - automotive;
 - products.
 
-Videography remains a supported secondary service.
+Videography remains a visible secondary service.
 
-The design direction is **Editorial Commerce**: cinematic photography and editorial typography combined with clear commercial structure and strong booking actions.
+## 2. Core Direction
 
-## 2. Design Principles
+The approved direction is **Editorial Commerce**.
 
-### 2.1 Conversion first
+It combines:
 
-The homepage is not a passive portfolio. Every major section should reduce uncertainty and move the visitor toward booking.
+- cinematic photography;
+- strong editorial typography;
+- minimal UI chrome;
+- clear commercial hierarchy;
+- restrained pricing and booking cues;
+- smooth tonal transitions between dark and light areas;
+- confidence through proof rather than decorative interface.
 
-The narrative order is:
+The homepage narrative is:
 
-**Photography → Service → Price → Proof → Trust → Process → Book**
+**Impact → Services → Price → Proof → Trust → Process → Book**
 
-### 2.2 Less UI, more proof
+The visual principle is:
 
-Prefer real work over decorative interface.
+**Less UI, more proof.**
 
-- Prefer a strong project image over a “premium” badge.
-- Prefer a before/after example over a card claiming professional editing.
-- Prefer a clear price and CTA over repeated statistics.
-- Avoid UI patterns that make a photography business look like a SaaS dashboard.
+Whenever there is a choice between a decorative card and a strong photograph, prefer the photograph. Whenever there is a choice between repeated marketing copy and clear commercial information, prefer the clear information.
 
-### 2.3 Hybrid visual rhythm
+## 3. Site-wide Visual System
 
-The site alternates between cinematic dark sections and warm light sections rather than rendering the entire homepage on near-black.
+### 3.1 Scope rule
 
-Target rhythm:
+The system in this document is not a homepage-only aesthetic.
 
-1. Dark — Hero
-2. Ivory — Services
-3. Dark — Selected Work
-4. Ivory — Why Pavlov Photography
-5. Dark — Before / After
-6. Dark photographic — Videography
-7. Ivory — How It Works
-8. Dark — Reviews
-9. Ivory — FAQ
-10. Dark — Final Booking CTA
+Typography, color logic, spacing, image treatment, navigation behavior, button language, motion rules, and surface treatment are intended to become the shared design language of the whole site.
 
-### 2.4 Content must be true
-
-Do not invent clients, awards, project counts, testimonials, statistics, service capabilities, prices, or turnaround promises.
-
-The implementation may only use claims already supported by the current site content or explicitly provided by the owner.
-
-### 2.5 Progressive enhancement, never hidden-by-default content
-
-Critical content must be visible in server-rendered HTML.
-
-Animations may add polish after hydration, but hero copy, service information, pricing, portfolio proof, contact information, and major headings must never rely on JavaScript to become visible.
-
-The previous failure mode is explicitly prohibited:
-
-`SSR → opacity: 0 → wait for hydration / in-view animation`
-
-## 3. Visual Direction
-
-### 3.1 Visual north star
-
-The approved hypothetical mockup establishes the intended feeling, not a pixel-perfect implementation contract:
-
-- dark cinematic hero;
-- editorial serif display typography;
-- restrained muted-brass accent;
-- a three-image hero composition representing real estate, automotive, and products;
-- clean top navigation;
-- strong booking CTA;
-- immediate transition into a warm ivory services section.
-
-Production must use real owner-approved photography. The hypothetical mockup imagery is reference-only and must not be treated as portfolio evidence.
+Phase 1 applies the system only to the homepage. Later phases may migrate the remaining routes to the same system without changing the core design direction.
 
 ### 3.2 Color system
 
@@ -102,238 +63,279 @@ Production must use real owner-approved photography. The hypothetical mockup ima
 - **Ink:** approximately `#151515`
 - **Soft black:** approximately `#1C1B19`
 - **Warm white:** approximately `#F5F1E8`
-- **Muted dark text:** warm neutral gray, never blue-gray
+- **Muted text:** warm neutral gray, never blue-gray
 
 #### Light surfaces
 
 - **Ivory:** approximately `#F2EEE5`
 - **Paper:** approximately `#E9E2D6`
-- **Light-section text:** approximately `#191816`
+- **Primary text on light:** approximately `#191816`
 
 #### Accent
 
 Use a restrained warm ochre / muted brass around `#B79052`.
 
-The accent must be sparse. It can support:
+The accent is sparse and functional. Appropriate uses include:
 
-- eyebrow labels;
-- fine rules;
-- selected focus states;
+- small rules;
+- selected hover/focus details;
+- occasional typographic emphasis;
 - subtle CTA emphasis;
-- small metadata.
+- compact metadata.
 
-It must not become a dominant “gold UI” theme. The photographs are the primary source of color.
+The interface must not become a dominant “gold UI” theme. Photography remains the main source of color.
 
 ### 3.3 Typography
 
-Retain the existing font pairing because it already supports Latin and Cyrillic:
+Retain the existing font pair:
 
 - **Cormorant Garamond** — display/editorial voice;
-- **Inter** — navigation, body copy, pricing, metadata, forms, controls.
+- **Inter** — navigation, body, pricing, metadata, controls, forms.
+
+Cormorant Garamond should be used more deliberately than in the current site rather than appearing only as an italic accent word.
 
 Target hierarchy:
 
-- Hero display: roughly 80–96px on large desktop, responsive downward;
-- Major section headings: roughly 48–64px desktop;
-- Mobile major headings: roughly 36–44px;
-- Body: comfortable commercial reading size, approximately 16–18px depending on context.
+- hero display: roughly 80–96px on large desktop, responsive downward;
+- major section headings: roughly 48–64px desktop;
+- mobile major headings: roughly 36–44px;
+- body text: approximately 16–18px depending on context.
 
-Use less uppercase text and less extreme letter-spacing than the current homepage.
-
-Hero headline direction:
-
-**Снимки, които**  
-*продават.*
-
-The second line may use Cormorant italic and muted brass, but the accent must remain refined rather than fluorescent.
+Use less uppercase copy and less extreme letter-spacing than the current site.
 
 ### 3.4 Image treatment
 
-Photography must dominate the page.
+Photography must dominate the layout.
 
 Use:
 
-- mixed portrait and landscape crops;
 - large editorial image blocks;
+- mixed portrait and landscape crops;
 - controlled asymmetry;
+- meaningful responsive crop positions;
 - minimal overlays;
-- minimal or square-ish corner radii, approximately 4–10px where needed;
-- purposeful responsive crops.
+- minimal or square-ish radii, approximately 4–10px where needed.
 
 Avoid:
 
-- putting every image inside the same rounded card;
-- excessive gradients over images;
-- decorative glow around images;
-- uniform masonry that makes every project feel equally important.
+- placing every image inside an identical rounded card;
+- excessive image gradients;
+- decorative glow;
+- glassmorphism;
+- uniform card grids that give every project the same visual weight.
+
+Production imagery presented as portfolio proof must be owner-approved work. Stock imagery must not be presented as the photographer’s own work.
 
 ### 3.5 Cards
 
-Cards are primarily appropriate for the three service choices immediately below the hero.
+Cards are used only when they help commercial scanning.
+
+The main card use in Phase 1 is the three service choices after the hero.
 
 Service cards should use:
 
-- ivory/paper surfaces;
+- light paper/ivory surfaces or a restrained transitional equivalent;
 - thin borders;
 - little or no shadow;
 - one strong image;
 - service name;
-- prominent starting price;
+- clear starting price;
 - one concise description;
-- a text-forward CTA.
+- text-forward CTA.
 
-Avoid nested cards, glassmorphism, glow, and heavy elevation.
+Avoid nested cards and card-within-card layouts.
 
 ### 3.6 Buttons
 
-Primary CTA wording:
+Primary CTA:
 
 **Запази снимане →**
 
-Treatment:
-
-- solid dark on light sections;
-- warm ivory or brass-accented treatment on dark sections;
-- modest radius around 4–8px;
-- not a large pill;
-- subtle arrow movement on hover is acceptable.
-
-Secondary CTA example:
+Secondary CTA:
 
 **Виж услугите ↘**
 
-Secondary actions should be visually quieter than the booking CTA.
+Treatment:
+
+- modest radius, approximately 4–8px;
+- no oversized pill treatment;
+- clear contrast;
+- subtle arrow movement on hover is acceptable;
+- dark-on-light and warm-light-on-dark variants should share the same geometry.
 
 ### 3.7 Navigation
 
-Desktop navigation direction:
+Desktop direction:
 
 **PAVLOV PHOTOGRAPHY** — `Работа` · `Услуги` · `За мен` · `Контакт` — **Запази снимане**
 
 At the top of the page:
 
-- transparent over the hero;
+- visually minimal;
+- transparent or nearly transparent over the dark hero;
 - no large floating capsule;
 - no decorative oversized frame.
 
 After scroll:
 
-- subtle warm-dark solid/translucent surface;
-- light blur only if it improves readability;
+- subtle warm-dark surface;
+- light blur only if needed for legibility;
 - clear focus and hover states.
 
 Mobile:
 
 - brand remains visible;
-- menu control is compact and accessible;
+- compact accessible menu control;
 - booking remains easy to reach.
 
 ### 3.8 Motion
 
-Motion should be restrained and optional.
+Motion is restrained enhancement, never a visibility dependency.
 
 Target:
 
-- 150–300ms interaction transitions;
-- subtle image scale on hover where appropriate;
-- underline or arrow movement;
-- very light reveal enhancement only for non-critical content;
+- 150–300ms transitions;
+- subtle image scale where useful;
+- underline/arrow movement;
+- gentle tonal interpolation between sections where technically appropriate;
 - support `prefers-reduced-motion`.
 
-Do not hide content by default for animation.
+Critical rule:
 
-## 4. Homepage Information Architecture
+**Server-rendered critical content must be visible by default.**
 
-### 4.1 Hero — dark cinematic
+The previous failure mode is prohibited:
 
-Purpose: explain the service and show quality immediately.
+`SSR → opacity: 0 → wait for hydration / in-view animation`
 
-Desktop structure:
+Hero copy, service information, prices, portfolio proof, major headings, and booking controls must be visible without JavaScript animation.
 
-- approximately 45% copy / 55% imagery;
-- left: eyebrow, H1, supporting text, two CTAs, three trust signals;
-- right: a visually balanced three-image composition representing real estate, automotive, and products.
+## 4. Homepage Phase 1 Information Architecture
 
-Approved copy direction:
+### 4.1 Hero — full-viewport dark cinematic opening
 
-**Eyebrow**  
-`Теодор Павлов · Commercial Photography · София`
+Purpose: create immediate visual confidence with almost no explanatory clutter.
 
-**H1**  
-`Снимки, които продават.`
+The initial viewport must read as one complete dark composition. The next light section must not visibly intrude at first load on normal desktop or mobile viewport heights.
 
-**Supporting text**  
-`Професионална фотография за имоти, автомобили и продукти — с ясни цени, бързо предаване и кадри, готови за обяви, кампании и социални мрежи.`
+#### Hero content
 
-**Primary CTA**  
+The hero contains only:
+
+- site navigation;
+- headline;
+- primary CTA;
+- secondary CTA;
+- hero photography.
+
+#### Explicitly removed from the hero
+
+Do not include:
+
+- eyebrow text such as `Теодор Павлов · Commercial Photography · София`;
+- decorative line above the headline;
+- supporting paragraph below the headline;
+- trust/stat signals such as `24–48ч`, `София`, or `От €20`;
+- icons/emojis accompanying those signals;
+- service cards inside the hero.
+
+#### Headline
+
+**Снимки, които**  
+*продават.*
+
+The second line may use Cormorant Garamond italic with restrained brass emphasis.
+
+#### Actions
+
+Primary:
+
 `Запази снимане`
 
-**Secondary CTA**  
+Secondary:
+
 `Виж услугите`
 
-**Trust signals**
+#### Desktop composition
 
-- `24–48ч предаване`
-- `София и региона`
-- `От €20`
+Target approximately 40–45% copy / 55–60% imagery.
 
-The current large hero service cards are removed from the hero.
+The image area should represent the breadth of the business through a refined multi-image composition, ideally using real estate, automotive, and product work when owner-approved assets exist.
 
-Mobile order:
+The hero must not feel like three cards placed beside text. It should feel like one composed photographic spread.
+
+#### Mobile composition
+
+Order:
 
 1. navigation;
-2. H1;
-3. supporting text;
-4. CTAs;
-5. hero photography;
-6. trust signals.
+2. headline;
+3. CTAs;
+4. photography.
 
-The photography must appear early enough that the page still feels like a photography business on mobile.
+The opening should remain dark and complete before the next section appears.
 
-### 4.2 Services + starting prices — warm ivory
+### 4.2 Hero-to-content transition
 
-This is the first section after the hero.
+A hard black-to-white cut immediately below the hero is not allowed.
 
-Three equal service choices:
+The transition into the next section should feel gradual and intentional.
+
+Preferred approaches include:
+
+- dark charcoal gradually warming toward graphite/taupe;
+- layered background interpolation;
+- subtle gradient bridge;
+- a transitional dark-warm section edge before full ivory appears later.
+
+The first visible content after the hero may remain dark or warm graphite. Full ivory should arrive only after enough scroll that it feels like a new chapter rather than a white strip under the opening screen.
+
+The transition must remain performant and must not depend on expensive scroll-JavaScript effects when CSS can achieve the same result.
+
+### 4.3 Services + starting prices
+
+The three services remain the first major commercial information after the hero transition.
+
+The three choices are equal in visual weight.
 
 #### Недвижими имоти
 
 - starting price: `от €30`;
 - audience direction: brokers, agencies, Airbnb, private listings;
-- one real project image;
+- one owner-approved image;
 - CTA: `Виж пакетите →`.
 
 #### Автомобили
 
 - starting price: `от €20`;
 - audience direction: private listings, dealerships, premium listings;
-- one real project image;
+- one owner-approved image;
 - CTA: `Виж пакетите →`.
 
 #### Продукти
 
 - starting price: `от €30`;
 - audience direction: e-commerce, social content, campaigns;
-- one real project image;
+- one owner-approved product image before it is presented as portfolio work;
 - CTA: `Виж пакетите →`.
 
-The section must make service type and entry price understandable with one quick scan.
+The section must communicate service and entry price in one quick scan without turning into a pricing dashboard.
 
-### 4.3 Selected Work — dark editorial
+### 4.4 Selected Work — dark editorial proof
 
-Purpose: prove quality before asking the visitor to trust marketing claims.
+Use approximately 4–6 strong owner-approved images in an asymmetric editorial composition.
 
-Use approximately 4–6 high-quality images in an asymmetric editorial composition.
-
-Possible representation:
+Possible hierarchy:
 
 - one dominant automotive landscape;
-- one tall interior image;
+- one tall detail/interior image;
 - one dominant real-estate image;
-- one product image;
-- one or two additional strong projects if they improve composition.
+- one product image when approved real product work is available;
+- one or two additional images only if they improve composition.
 
-Metadata should be minimal, for example:
+Metadata is minimal.
+
+Example:
 
 `AUTOMOTIVE · BMW M SERIES`
 
@@ -343,22 +345,22 @@ CTA:
 
 Do not reproduce the current eight equally weighted rounded gallery cards on the homepage.
 
-### 4.4 Why Pavlov Photography — ivory
+### 4.5 Why Pavlov Photography
 
-Merge and condense the current long About content, statistics, quote treatment, and relevant terms/trust content.
+Condense the current About, trust information, and useful terms into one calm section.
 
 Heading direction:
 
 `Професионално заснемане без излишно усложнение.`
 
-Four trust points:
+Trust points:
 
 1. `Ясна цена предварително`
 2. `Предаване до 24–48 часа`
 3. `Обработени готови файлове`
 4. `Директна комуникация с фотографа`
 
-Include a concise personal identity block:
+Identity block:
 
 **Теодор Павлов**  
 `Commercial photographer · Sofia`
@@ -367,29 +369,25 @@ CTA:
 
 `Повече за мен →`
 
-The homepage should not repeat the full biography already available on `/about`.
+The homepage does not repeat the full biography from `/about`.
 
-### 4.5 Before / After — dark
+### 4.6 Before / After
 
-Promote the existing before/after interaction into a stronger proof section.
+Promote the current before/after interaction into a large proof section.
 
-Use a large, dominant comparison slider.
+Heading direction:
 
-Copy direction:
-
-**Heading**  
 `Снимането е половината работа.`
 
-**Supporting copy**  
+Supporting copy:
+
 `Всеки финален кадър преминава през корекция на светлина, цвят, перспектива и детайл.`
 
-Avoid surrounding this proof with unnecessary cards.
+Use a large comparison surface and avoid decorative cards around it.
 
-### 4.6 Videography — cinematic strip
+### 4.7 Videography
 
-Videography remains visible but is simplified.
-
-Use one large visual/thumbnail with concise supporting copy.
+Simplify videography into one cinematic feature rather than a tab system with repeated feature cards.
 
 Content direction:
 
@@ -402,11 +400,11 @@ CTA:
 
 `Виж видеография →`
 
-Remove the homepage’s current large videography tab system and repetitive feature-card grid. Detailed information remains available on the dedicated service page.
+Detailed information remains on the dedicated service page.
 
-### 4.7 How It Works — ivory
+### 4.8 How It Works
 
-Three-step conversion section:
+Three-step section:
 
 #### 01 Запитване
 
@@ -420,23 +418,21 @@ Three-step conversion section:
 
 `Обработени файлове до 24–48 часа.`
 
-This section should make the service feel simple and low-friction.
+The goal is to make booking feel simple and low-friction.
 
-### 4.8 Reviews — dark
+### 4.9 Reviews
 
-Display all three current testimonials at once on desktop rather than hiding two behind a carousel.
+Show all three existing testimonials without requiring carousel interaction on desktop.
 
-One review may be visually featured, but all three should be discoverable without interaction.
+One may be visually featured, but all three remain discoverable immediately.
 
-On smaller screens, stacking is acceptable.
+On smaller screens they may stack.
 
-Do not invent additional testimonials.
+Do not invent testimonials.
 
-### 4.9 FAQ — ivory
+### 4.10 FAQ
 
-Keep the homepage FAQ short and focused on booking blockers.
-
-Target questions:
+Keep only the strongest booking blockers:
 
 1. `Кога получавам снимките?`
 2. `Как се запазва час?`
@@ -444,17 +440,15 @@ Target questions:
 4. `Снимаш ли извън София?`
 5. `Как се плаща?`
 
-Long-tail information can remain on service/detail pages.
+### 4.11 Final booking section
 
-### 4.10 Final Booking Section — dark
-
-End with a strong booking decision rather than a passive footer.
+End with a decisive booking section.
 
 Heading direction:
 
 `Нека заснемем следващия ви проект.`
 
-Supporting categories:
+Categories:
 
 `Имоти · Автомобили · Продукти · Видео`
 
@@ -466,9 +460,9 @@ Direct alternative:
 
 `0889 755 406`
 
-Retain the existing contact functionality and Formspree integration unless a separate feature request changes it.
+Retain the existing contact functionality and Formspree integration unless separately requested.
 
-The form remains concise:
+Form fields remain concise:
 
 - Name;
 - Phone;
@@ -477,25 +471,25 @@ The form remains concise:
 
 ## 5. Content Consolidation
 
-The redesign does not delete valid business information from the site. It removes duplication from the homepage and leaves detailed information on dedicated pages.
+The redesign does not delete valid business information from the site. It removes duplication from the homepage and leaves detail on dedicated pages.
 
-Remove or merge as standalone homepage sections:
+Merge or remove as standalone homepage sections:
 
-- the current long About presentation;
-- the six-card Terms section;
-- the large videography tabs and repeated feature cards;
-- the current presentation of three pricing cards per category on the homepage;
+- the long current About presentation;
+- six-card Terms section;
+- large videography tabs and repeated feature cards;
+- three pricing cards per category on the homepage;
 - repeated statistics cards;
 - carousel-only testimonial presentation;
-- repeated statements about 48-hour delivery, Sofia, Drive/WeTransfer, and payment when they do not add new information.
+- repeated statements about delivery time, Sofia, Drive/WeTransfer, and payment when they add no new information.
 
-Dedicated pages such as `/about`, `/services`, service detail pages, and portfolio pages remain available for depth.
+The dedicated routes remain the place for depth.
 
 ## 6. Component Architecture
 
-`HomePage.tsx` should become an orchestration layer rather than carrying substantial visual logic.
+`HomePage.tsx` becomes an orchestration layer.
 
-Recommended homepage component boundaries:
+Recommended Phase 1 boundaries:
 
 - `HomeHero`
 - `HomeServices`
@@ -508,171 +502,171 @@ Recommended homepage component boundaries:
 - `HomeFaq`
 - `BookingSection`
 
-Reuse existing focused components when they already satisfy the new design cleanly. Do not refactor unrelated site architecture.
+Reuse existing focused components where they cleanly fit the new design. Do not refactor unrelated architecture.
 
-Each homepage component should have one clear responsibility and should consume structured content rather than duplicating business copy inside presentation logic where practical.
+Shared design primitives created for Phase 1 should be reusable by later site-wide migration rather than hard-coded exclusively to the homepage.
+
+Examples of reusable primitives/tokens include:
+
+- dark/light section surfaces;
+- spacing scale;
+- display typography;
+- buttons;
+- navigation treatment;
+- editorial image frame/caption treatment;
+- focus states;
+- motion durations.
 
 ## 7. Responsive Behavior
 
 ### Desktop
 
-- Hero roughly 45/55 copy-to-image balance;
-- three-column service section;
-- asymmetric editorial portfolio;
-- three reviews visible simultaneously;
-- generous display typography and whitespace.
+- full-viewport dark hero;
+- roughly 40–45/55–60 copy/image balance;
+- no next light section visible at initial load;
+- three-column services;
+- asymmetric selected-work layout;
+- three reviews visible simultaneously.
 
 ### Tablet
 
-- preserve strong hero imagery while reducing complexity;
-- service cards may use 2+1 or a clean stacked arrangement depending on width;
-- selected work becomes a controlled two-column composition;
-- avoid cramped typography or tiny metadata.
+- preserve strong hero photography with reduced composition complexity;
+- service cards may use 2+1 or clean stacking;
+- selected work becomes controlled two-column layout;
+- no cramped display type.
 
 ### Mobile
 
-- copy precedes hero imagery;
-- both hero CTAs remain prominent;
+- full dark opening state;
+- headline and CTAs first;
+- photography immediately after actions;
+- no trust-signal/icon row;
 - service cards stack;
 - no horizontal overflow;
-- touch targets should be approximately 44px minimum where applicable;
-- typography scales without awkward one-word lines;
-- booking remains easy to reach;
-- portfolio crops must remain meaningful, not arbitrary center-crops.
+- touch targets approximately 44px minimum where applicable;
+- meaningful image crops;
+- booking remains easy to reach.
 
-## 8. Performance Requirements
+## 8. Performance
 
-Photography is the heaviest content, so image delivery is a design requirement rather than a later optimization.
-
-Use Next.js image optimization appropriately:
-
-- `next/image` for production photography where compatible;
-- correct `sizes` values;
-- priority/preload only for truly above-the-fold hero imagery;
-- lazy loading below the fold;
-- defined dimensions/aspect ratios to prevent layout shift;
-- avoid shipping multi-megabyte originals directly where a properly optimized derivative can preserve visual quality;
-- avoid heavy JavaScript for decorative effects.
-
-Existing large local source images should be reviewed during implementation for appropriate web delivery.
-
-## 9. Accessibility Requirements
-
-The redesign must preserve or improve accessibility.
+Photography is the largest performance risk.
 
 Requirements:
 
-- meaningful alt text for portfolio and commercial photography;
-- sufficient contrast on dark and ivory backgrounds;
+- use `next/image` where appropriate;
+- set accurate `sizes`;
+- priority/preload only genuinely above-the-fold imagery;
+- lazy-load lower-page imagery;
+- avoid shipping multi-megabyte originals unnecessarily when optimized derivatives are possible;
+- reserve image dimensions to prevent CLS;
+- avoid heavy client JavaScript for decorative effects;
+- prefer CSS for tonal transitions where practical.
+
+The hero may use multiple images, but the composition must be performance-budgeted rather than loading three maximum-resolution originals by default.
+
+## 9. Accessibility
+
+Requirements:
+
+- sufficient contrast across dark, transitional, and light surfaces;
+- meaningful alt text for portfolio proof;
 - visible keyboard focus;
-- semantic heading order;
-- explicit accessible names for controls;
-- keyboard-operable before/after comparison;
-- real labels for form controls;
-- accessible validation feedback;
+- semantic heading hierarchy;
+- accessible menu controls;
+- approximately 44px touch targets where practical;
+- before/after remains keyboard-operable;
+- form labels remain real labels;
 - `prefers-reduced-motion` support;
-- navigation/menu operable without pointer input.
+- visual transitions never reduce text readability.
 
-## 10. Functional Constraints
+## 10. Content Truth and Asset Integrity
 
-The redesign must not break:
+Do not invent:
+
+- clients;
+- awards;
+- project counts;
+- testimonials;
+- statistics;
+- service capabilities;
+- prices;
+- turnaround guarantees beyond existing approved claims.
+
+The repository currently contains stock product/real-estate portfolio examples. They may remain on existing pages until separately addressed, but Phase 1 must not elevate stock imagery into hero or selected-work proof as though it were Teodor Pavlov’s own photography.
+
+A real owner-approved product photograph is required before the final production hero/selected-work composition can truthfully represent all three primary categories with portfolio evidence.
+
+## 11. Acceptance Criteria
+
+Phase 1 is complete only when all of the following are true.
+
+### Visual / UX
+
+- initial viewport is fully dark/cinematic and does not show a white/ivory strip from the next section;
+- hero shows only navigation, `Снимки, които продават.`, two CTAs, and photography;
+- no hero eyebrow, decorative rule, support paragraph, trust signals, icons, or emojis;
+- hero-to-content transition is gradual rather than a hard black-to-white cut;
+- three primary services and starting prices are easy to scan after the opening transition;
+- selected work feels like an editorial photo spread, not a SaaS card grid;
+- site-wide tokens/primitives created in Phase 1 are reusable for later route migration.
+
+### Functional
+
+- navigation and anchors work;
+- service links target correct routes;
+- portfolio links work;
+- before/after interaction works;
+- FAQ works;
+- contact form preserves current functionality;
+- telephone action remains usable;
+- no horizontal overflow at supported viewport sizes.
+
+### Motion / rendering
+
+- critical SSR content is visible before hydration;
+- no critical component ships with hidden-by-default `opacity: 0` behavior;
+- reduced-motion users receive a stable experience.
+
+### Verification
+
+- existing relevant unit/component tests pass or are intentionally updated for the approved redesign;
+- lint passes;
+- production `next build` passes;
+- responsive sanity checks pass on mobile, tablet, and desktop;
+- live Vercel deployment reaches `READY`;
+- `pavlovphotography.eu` and `www.pavlovphotography.eu` serve the new production deployment;
+- final live smoke check confirms the opening viewport and SSR visibility requirements.
+
+## 12. Out of Scope for Phase 1
+
+Phase 1 does not redesign the implementation of:
 
 - `/about`;
 - `/services`;
-- service detail pages;
-- `/portfolio`;
-- portfolio detail routes;
-- navbar anchors/links;
-- before/after control;
-- FAQ interaction;
-- contact form submission;
-- telephone CTA;
-- current Vercel deployment workflow and custom domains.
+- individual service pages;
+- `/portfolio` and portfolio detail pages;
+- unrelated backend/integrations;
+- Formspree behavior;
+- deployment architecture.
 
-No new backend is required for this redesign.
+Those routes are expected to migrate later to the same approved site-wide visual system.
 
-## 11. Testing and Acceptance Criteria
+## 13. Design Decision Summary
 
-The redesign is complete only when both functional verification and visual goals pass.
+Approved direction:
 
-### Automated / build gates
-
-- existing unit/component tests pass or are intentionally updated when the approved UI contract changes;
-- lint passes;
-- production `next build` passes;
-- no TypeScript errors.
-
-### Functional smoke gates
-
-- homepage renders all critical content without animation dependency;
-- navbar and homepage navigation work;
-- service links target correct destinations;
-- portfolio CTA and relevant project links work;
-- before/after interaction works;
-- FAQ interaction works;
-- contact form retains current functionality;
-- telephone CTA is correct;
-- no horizontal overflow at target mobile/tablet/desktop widths.
-
-### Responsive visual gates
-
-Verify at representative mobile, tablet, and desktop sizes.
-
-The page must preserve:
-
-- clear hero hierarchy;
-- visible photography early on mobile;
-- readable service pricing;
-- intentional image crops;
-- stable spacing rhythm;
-- usable touch targets.
-
-### Performance / rendering gates
-
-- critical homepage content is present and visible in initial server-rendered HTML;
-- no major layout shift from undefined media dimensions;
-- hero media is intentionally prioritized and lower sections are not unnecessarily eager-loaded;
-- no regression to the previous `opacity:0` initial-render defect.
-
-### Production verification
-
-After merge/deployment:
-
-- Vercel production deployment is `READY`;
-- deployment corresponds to the intended commit SHA;
-- `pavlovphotography.eu` and `www.pavlovphotography.eu` resolve to the new production deployment;
-- live homepage smoke check passes;
-- initial HTML confirms critical content is visible without hydration.
-
-### Visual acceptance
-
-Compare the implementation against the approved hypothetical mockup and this specification using five criteria:
-
-1. **Hierarchy** — the visitor knows what the business offers immediately;
-2. **Image dominance** — photography leads, UI recedes;
-3. **Light/dark rhythm** — the page has deliberate visual chapters;
-4. **Typography** — editorial, premium, readable, and Cyrillic-safe;
-5. **Conversion clarity** — services, starting prices, proof, and booking are obvious.
-
-## 12. Out of Scope
-
-Unless separately approved, this redesign does not include:
-
-- redesigning all internal pages to the new system;
-- changing backend/contact providers;
-- adding a CMS;
-- adding booking/calendar software;
-- inventing new portfolio material;
-- changing pricing strategy;
-- changing the three primary commercial service categories;
-- unrelated repository refactors;
-- DNS/domain migration;
-- Vercel project replacement.
-
-## 13. Implementation Safety
-
-Implementation should happen on a non-production feature branch first.
-
-Do not use `main` as the experimentation surface. The existing live production homepage remains the rollback baseline until the redesign passes tests and visual review.
-
-Production promotion should be a deliberate final step after local/build verification and review.
+- **Site-wide design system:** yes;
+- **Phase 1 implementation:** homepage only;
+- **Primary mode:** conversion-first;
+- **Primary categories:** real estate, automotive, products equally weighted;
+- **Style:** Editorial Commerce;
+- **Opening:** full-viewport cinematic dark;
+- **Hero copy:** headline only, no explanatory microcopy;
+- **Hero actions:** `Запази снимане` + `Виж услугите`;
+- **Hero clutter:** no eyebrow, rule, paragraph, trust row, icons, or emojis;
+- **Color rhythm:** dark opening with gradual tonal transitions, not a visible white cut;
+- **Typography:** Cormorant Garamond + Inter;
+- **Accent:** restrained muted brass;
+- **Portfolio treatment:** image-led editorial proof;
+- **Motion:** progressive enhancement only;
+- **Content integrity:** owner-approved work only when presented as portfolio proof.
