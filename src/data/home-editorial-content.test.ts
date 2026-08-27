@@ -25,4 +25,9 @@ describe("homeEditorialContent", () => {
     expect(productService?.image).toBeNull();
     expect(homeEditorialContent.hero.images).toHaveLength(2);
   });
+
+  it("uses the BMW photograph as the dominant hero image", () => {
+    expect(homeEditorialContent.hero.images[0]?.src).toBe("/portfolio/bmw-m-series.png");
+    expect(homeEditorialContent.hero.images[1]?.src).toBe("/portfolio/urban-apartment.png");
+  });
 });
